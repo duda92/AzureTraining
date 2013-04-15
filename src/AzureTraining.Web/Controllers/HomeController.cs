@@ -1,32 +1,50 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
+using AzureTraining.Core;
+using AzureTraining.Web.Models;
+using AzureTraining.Core.WindowsAzure;
 
 namespace AzureTraining.Web.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Index()
-        {
-            ViewBag.Message = "Modify this template to jump-start your ASP.NET MVC application.";
+        private readonly IDocumentRepository _repository;
 
-            return View();
+        public HomeController(IDocumentRepository repository)
+        {
+            _repository = repository;
         }
 
-        public ActionResult About()
+        public HomeController() : this(new DocumentRepository())
         {
-            ViewBag.Message = "Your app description page.";
-
-            return View();
+            
         }
 
-        public ActionResult Contact()
+        public ActionResult Upload()
         {
-            ViewBag.Message = "Your contact page.";
+            DocumentUploadViewModel documentViewModel = new DocumentUploadViewModel {};
 
-            return View();
+            return View(documentViewModel);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult Upload(DocumentUploadViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            string owner = "defaultOwner";//User.Identity.Name.ToLowerInvariant() == string.Empty ? User.Identity.Name.ToLowerInvariant() : 
+            
+            _repository.Add(new Document { 
+                Description = model.Description,
+                Owner = owner,
+                IsShared = model.IsShared
+            }, model.Content, model.Name);
+
+            return RedirectToAction("Upload", "Home");
         }
     }
 }

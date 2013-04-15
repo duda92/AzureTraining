@@ -1,0 +1,17 @@
+﻿@{
+    ViewBag.Title = "Upload";
+}
+
+@using (Html.BeginForm("Upload", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <input type="checkbox" id="IsRaw" name="IsRaw" />
+    
+    <input type="file" id="File" name="File"/>
+    
+    <input type="text" id="Name" name="Name"/>
+
+    <textarea id="Text" name="Text"></textarea>
+    
+    <input type="submit" value="Upload"/>
+
+}
