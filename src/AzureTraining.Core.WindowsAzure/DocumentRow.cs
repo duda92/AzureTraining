@@ -7,11 +7,9 @@
 
     public class DocumentRow : TableServiceEntity
     {
-        public int DocumentId { get; set; }
+        public string DocumentId { get; set; }
 
         public string Name { get; set; }
-
-        public string Description { get; set; }
 
         public string Url { get; set; }
 
@@ -28,7 +26,6 @@
         {
             this.DocumentId = document.DocumentId;
             this.Name = document.Name;
-            this.Description = document.Description;
             this.Owner = document.Owner;
             this.Url = document.Url;
             this.IsShared = document.IsShared;

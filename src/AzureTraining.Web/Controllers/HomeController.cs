@@ -7,7 +7,7 @@ using AzureTraining.Core.WindowsAzure;
 
 namespace AzureTraining.Web.Controllers
 {
-    public class HomeController : Controller
+    public partial class HomeController : Controller
     {
         private readonly IDocumentRepository _repository;
 
@@ -21,30 +21,13 @@ namespace AzureTraining.Web.Controllers
             
         }
 
-        public ActionResult Upload()
+        public virtual ActionResult Index()
         {
-            DocumentUploadViewModel documentViewModel = new DocumentUploadViewModel {};
+            var user = User.Identity.Name;
+            var documents = _repository.GetAccessDocumentsForUser(user);
 
-            return View(documentViewModel);
-        }
-
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult Upload(DocumentUploadViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            string owner = "defaultOwner";//User.Identity.Name.ToLowerInvariant() == string.Empty ? User.Identity.Name.ToLowerInvariant() : 
-            
-            _repository.Add(new Document { 
-                Description = model.Description,
-                Owner = owner,
-                IsShared = model.IsShared
-            }, model.Content, model.Name);
-
-            return RedirectToAction("Upload", "Home");
+            var documentsListViewModel = new DocumentsListViewModel(documents);
+            return View(documentsListViewModel);
         }
     }
 }

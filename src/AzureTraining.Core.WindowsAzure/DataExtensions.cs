@@ -19,7 +19,6 @@ namespace AzureTraining.Core.WindowsAzure
             return new Document()
             {
                 DocumentId = row.DocumentId,
-                Description = row.Description,
                 Owner = row.Owner,
                 Name = row.Name,
                 Url = row.Url,

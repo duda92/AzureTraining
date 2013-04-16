@@ -8,18 +8,22 @@ namespace AzureTraining.Core
     {
         IEnumerable<Document> GetDocumentsByOwner(string owner);
 
-        Document GetDocumentById(string owner, int documentId);
+        IEnumerable<Document> GetAccessDocumentsForUser(string user);
+
+        Document GetDocumentById(string owner, string documentId);
         
-        void Add(Document document, string text, string name);
+        void Add(Document document, string text);
 
         void Update(Document document, string text, string name);
 
-        void Share(int documentId);
+        void Share(string documentId);
 
-        void StopShare(int documentId);
+        void StopShare(string documentId);
 
-        void Delete(int documentId);
+        void Delete(string documentId);
 
         void BootstrapUser(string userName);
+
+        
     }
 }

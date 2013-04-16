@@ -5,6 +5,7 @@
     using System.Linq;
     using Microsoft.WindowsAzure;
     using Microsoft.WindowsAzure.StorageClient;
+    using AzureTraining.Core.WindowsAzure.Helpers;
 
     public class DocumentsDataContext : TableServiceContext, IDisposable
     {
@@ -16,7 +17,7 @@
         private readonly Dictionary<string, Type> resolverTypes;
 
         public DocumentsDataContext()
-            : this(CloudStorageAccount.FromConfigurationSetting("DataConnectionString"))
+            : this(AccountHelper.GetAccount())
         {
         }
 

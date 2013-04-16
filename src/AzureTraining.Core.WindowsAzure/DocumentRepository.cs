@@ -5,6 +5,7 @@ using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 using System.Diagnostics;
 using System.Collections.Generic;
+using AzureTraining.Core.WindowsAzure.Helpers;
 
 namespace AzureTraining.Core.WindowsAzure
 {
@@ -20,8 +21,16 @@ namespace AzureTraining.Core.WindowsAzure
         }
 
         public DocumentRepository()
-            : this(CloudStorageAccount.FromConfigurationSetting("DataConnectionString"))
+            : this(AccountHelper.GetAccount())
         {
+        }
+
+        public IEnumerable<Document> GetAccessDocumentsForUser(string user)
+        {
+            using (var context = new DocumentsDataContext())
+            {
+                return context.Documents.Where(p => p.IsShared == true || p.Owner == user).AsTableServiceQuery().ToList().ToModel();
+            }
         }
 
         public IEnumerable<Document> GetDocumentsByOwner(string owner)
@@ -32,7 +41,7 @@ namespace AzureTraining.Core.WindowsAzure
             }
         }
 
-        public Document GetDocumentById(string owner, int documentId)
+        public Document GetDocumentById(string owner, string documentId)
         {
             using (var context = new DocumentsDataContext())
             {
@@ -40,49 +49,17 @@ namespace AzureTraining.Core.WindowsAzure
             }
         }
 
-        public void Add(Document document, string text, string name)
+        public void Add(Document document, string text)
         {
-            //get just the file name and ignore the path
-            var file = name.Substring(name.LastIndexOf("\\", StringComparison.OrdinalIgnoreCase) + 1);
-
             using (var context = new DocumentsDataContext())
             {
-                try
-                {
-                    // add the photo to table storage
-                    context.AddObject(DocumentsDataContext.DocumentsTable, new DocumentRow(document));
-                    context.SaveChanges();
-                }
-                catch (Exception ex)
-                {
-                    if (ex.ToString().Contains("EntityAlreadyExists"))
-                    {
-                        //
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
-                // add the binary to blob storage
-                var storage = this.storageAccount.CreateCloudBlobClient();
-                var container = storage.GetContainerReference(document.Owner.ToLowerInvariant());
-                container.CreateIfNotExist();
-                container.SetPermissions(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
-                var blob = container.GetBlobReference(file);
-
-                blob.Properties.ContentType = ContentType;
-                blob.UploadText(text);
-
-                // post a message to the queue so it can process tags and the sizing operations
-                this.SendToQueue(
-                    Defines.DocumentsQueue,
-                    string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.Owner, document.DocumentId, file));
+                SaveEntryToTable(document, context);
+                var fileName = SaveBlob(document, text);
+                SendToQueue(Defines.DocumentsQueue, string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.Owner, document.DocumentId, fileName));
             }
         }
-
-        public void Delete(int documentId)
+  
+        public void Delete(string documentId)
         {
             using (var context = new DocumentsDataContext())
             {
@@ -104,19 +81,18 @@ namespace AzureTraining.Core.WindowsAzure
             context.DeleteObject(documentRow);
             context.SaveChanges();
 
-            // tell the worker role to clean up blobs
             this.SendToQueue(
                 Defines.DocumentsCleanupQueue,
                 string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.DocumentId, document.Owner, document.Url));
         }
 
-        public void Share(int documentId)
+        public void Share(string documentId)
         {
             // TODO: Implement this method
             throw new NotImplementedException();
         }
 
-        public void StopShare(int documentId)
+        public void StopShare(string documentId)
         {
             // TODO: Implement this method
             throw new NotImplementedException();
@@ -164,6 +140,54 @@ namespace AzureTraining.Core.WindowsAzure
             var q = queues.GetQueueReference(queueName);
             q.CreateIfNotExist();
             q.AddMessage(new CloudQueueMessage(msg));
+        }
+
+        private void SaveEntryToTable(Document document, DocumentsDataContext context)
+        {
+            for (int copyNumber = 0; copyNumber < int.MaxValue; copyNumber++)
+            {
+                var docRow = new DocumentRow(document);
+                try
+                {
+                    SetUniqueNameAndId(document, copyNumber);
+                    context.AddObject(DocumentsDataContext.DocumentsTable, docRow);
+                    context.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    if (ex.ToString().Contains("EntityAlreadyExists"))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                break;
+            }
+        }
+
+        private void SetUniqueNameAndId(Document document, int copyNumber)
+        {
+            var copySuffix = copyNumber == 0 ? string.Empty : string.Format("_{0}", copyNumber);
+            var identityString = document.Owner + document.Name + copySuffix;
+
+            document.DocumentId = KeyGenerationHelper.GetSlug(identityString);
+            document.Name = document.Name + copySuffix;
+        }
+
+        private string SaveBlob(Document document, string text)
+        {
+            var storage = this.storageAccount.CreateCloudBlobClient();
+            var container = storage.GetContainerReference(document.Owner.ToLowerInvariant());
+            container.CreateIfNotExist();
+            container.SetPermissions(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
+            var fileName = document.Name.Substring(document.Name.LastIndexOf("\\", StringComparison.OrdinalIgnoreCase) + 1);
+            var blob = container.GetBlobReference(fileName);
+            blob.Properties.ContentType = ContentType;
+            blob.UploadText(text);
+            return fileName;
         }
     }
 }
