@@ -1,0 +1,125 @@
+﻿@using AzureTraining.Web.Helpers;
+@model AzureTraining.Web.Models.DocumentUploadViewModel
+
+@{
+    var fileInputId = "file";
+    var textInputId = "Content";
+}
+
+@Html.ValidationSummaryBootstrap()
+
+@using (Html.BeginForm("Upload", "DocumentUpload", FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    <div style="padding: 15px;"></div>
+    
+    <div class="alert alert-error" data-bind="visible: fileValidationMessage() != null, html: fileValidationMessage" >
+        
+    </div>
+    
+    @Html.EditorFor(x => x.Content, MVC.Shared.Views.EditorTemplates.FileEditablePreview, new { fileInputId = fileInputId, textInputId = textInputId })
+
+    <div class="control-group" data-bind="visible: fileSelected">
+        <label class="control-label" for="Name">Name<span class="required">*</span></label>
+        <div class="controls">
+            <input data-val="true" data-val-length="Name of uploading file must be longer than 2 character" data-val-length-min="2" data-val-required="Set the name of file" id="Name" name="Name" type="text" value="">
+            <span class="help-inline">
+                <span class="field-validation-valid" data-valmsg-for="Name" data-valmsg-replace="true"></span>
+            </span>
+        </div>
+    </div>
+    
+    <div class="control-group" data-bind="visible: fileSelected">
+        <div class="controls">
+            <label class="checkbox" for="IsShared">
+                Is Shared
+                @Html.CheckBoxFor(x => x.IsShared)
+            </label>
+        </div>
+    </div>
+   
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary" data-bind="enable: fileSelected">Upload</button>
+        <button type="button" class="btn">Cancel</button>
+    </div>
+    
+}
+
+<script type="text/javascript">
+    var viewModel;
+    $(function () {
+        viewModel =
+            {
+                maxSize: 1048576,
+                fileTypes: ['text/plain'],
+                fileExtensions: ['txt'],
+                fileValidationMessage: ko.observable(null),
+
+                contentInput: $("#@textInputId"),
+                
+                fileSelected: ko.observable(false),
+                fileSize: ko.observable(0),
+                fileType: ko.observable(),
+                fileName: ko.observable(),
+
+                SelectFile: function(file)
+                {
+                    if (typeof (file) == "undefined")
+                    {
+                        viewModel.fileSelected(false);
+                    }
+                    else
+                    {
+                        viewModel.fileSize(file.size);
+                        viewModel.fileType(file.type);
+                        viewModel.fileName(file.name);
+
+                        if (!viewModel.ValidateFile())
+                        {
+                            viewModel.fileSelected(false);
+                            return;
+                        }
+                        var reader = new FileReader();
+                        reader.onload = function (e)
+                        {
+                            viewModel.contentInput.html(e.target.result);
+                            viewModel.fileSelected(true);
+                        };
+                        reader.readAsText(file)
+                    }
+                },
+
+                ValidateFile: function (file)
+                {
+                    if (viewModel.fileSize() > viewModel.maxSize)
+                    {
+                        viewModel.fileValidationMessage("FileSize is larger than 1 mb");
+                        return false;
+                    }
+                    if ($.inArray(viewModel.fileType(), viewModel.fileTypes) == -1)
+                    {
+                        viewModel.fileValidationMessage("FileType is not acceptable");
+                        return false;
+                    }
+                    var extension = viewModel.fileName().split('.').pop();
+                    if ($.inArray(extension, viewModel.fileExtensions) == -1)
+                    {
+                        viewModel.fileValidationMessage("FileExtension is not acceptable");
+                        return false;
+                    }
+
+                    viewModel.fileValidationMessage(null);
+                    return true;
+                }
+            };
+        ko.applyBindings(viewModel);
+    
+
+        $("#@fileInputId").change(function (e)
+        {
+            var file = e.target.files[0];
+            viewModel.SelectFile(file);
+        });
+    })
+</script>
+
+
