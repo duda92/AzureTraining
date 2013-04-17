@@ -45,7 +45,7 @@ namespace AzureTraining.Core.WindowsAzure
         {
             using (var context = new DocumentsDataContext())
             {
-                return context.Documents.Where(p => p.Owner == owner && p.DocumentId == documentId).AsTableServiceQuery().AsEnumerable().ToModel().SingleOrDefault();
+                return context.Documents.Where(p => p.Owner == owner && p.DocumentId == documentId || p.DocumentId == documentId && p.IsShared == true).AsTableServiceQuery().AsEnumerable().ToModel().SingleOrDefault();
             }
         }
 

@@ -12,16 +12,16 @@
                 <p>@doc.Preview</p>
                 <p>
                     <a class="btn btn-primary btn-large" href="@doc.Url">Download</a>
-                    <a class="btn btn-primary btn-large">View</a>
+                    @Html.ActionLink("View", MVC.Documents.View(@doc.DocumentId), new { @class = "btn btn-primary btn-large" })
                     @if (DocRolesHelper.IsCurrentUserOwnerOfDocument(doc))
                     {
                         if (doc.IsShared)
                         {
-                            <a class="btn btn-primary btn-large">Privatize</a> 
+                            @Html.ActionLink("Protect", MVC.Documents.ChangeViewPolicy(doc.DocumentId, false), new { @class = "btn btn-primary btn-large" }) 
                         }
                         else
                         {
-                            <a class="btn btn-primary btn-large">Share</a> 
+                            @Html.ActionLink("Share", MVC.Documents.ChangeViewPolicy(@doc.DocumentId, true), new { @class = "btn btn-primary btn-large" })
                         }
                     }
                 </p>

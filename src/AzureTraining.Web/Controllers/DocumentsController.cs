@@ -10,18 +10,7 @@ namespace AzureTraining.Web.Controllers
 {
     public partial class DocumentsController : Controller
     {
-        private readonly IDocumentRepository _repository;
-
-        public DocumentsController(IDocumentRepository repository)
-        {
-            _repository = repository;
-        }
-
-        public DocumentsController()
-            : this(new DocumentRepository())
-        {
-            
-        }
+        private readonly IDocumentRepository _repository = new DocumentRepository();
 
         [Authorize]
         public virtual ActionResult Upload()
@@ -57,7 +46,23 @@ namespace AzureTraining.Web.Controllers
         {
             var owner = DocRolesHelper.CurrentOwnerKey;
             var document =_repository.GetDocumentById(owner, documentId);
-            return View(document);
+
+            var viewModel = new DocumentViewViewModel
+            {
+                Document = document
+            };
+
+            return View(viewModel);
+        }
+
+        [Authorize]
+        public virtual ActionResult ChangeViewPolicy(string documentId, bool isShared)
+        {
+            var owner = DocRolesHelper.CurrentOwnerKey;
+            var document = _repository.GetDocumentById(owner, documentId);
+            document.IsShared = isShared;
+            _repository.Update(document);
+            return RedirectToAction(MVC.Home.Index());
         }
     }
 }

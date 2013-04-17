@@ -235,9 +235,6 @@
     <Compile Include="DocumentsController.generated.cs">
       <DependentUpon>T4MVC.tt</DependentUpon>
     </Compile>
-    <Compile Include="DocumentUploadController.generated.cs">
-      <DependentUpon>T4MVC.tt</DependentUpon>
-    </Compile>
     <Compile Include="Filters\InitializeSimpleMembershipAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -250,6 +247,7 @@
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\DocumentsListViewModel.cs" />
     <Compile Include="Models\DocumentUploadViewModel.cs" />
+    <Compile Include="Models\DocumentViewViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SharedController.generated.cs">
       <DependentUpon>T4MVC.tt</DependentUpon>
@@ -357,7 +355,6 @@
     <Content Include="Scripts\jquery-ui-1.8.20.min.js" />
     <Content Include="Scripts\jquery-ui-1.8.24.js" />
     <Content Include="Scripts\jquery-ui-1.8.24.min.js" />
-    <Content Include="Scripts\jquery.toggle.buttons.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
     <Content Include="Scripts\jquery.validate.js" />
@@ -414,13 +411,14 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Web.config" />
-    <Content Include="Views\DocumentUpload\Upload.cshtml" />
+    <Content Include="Views\Documents\Upload.cshtml" />
     <Content Include="T4MVC.tt.hooks.t4" />
     <Content Include="T4MVC.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>T4MVC.cs</LastGenOutput>
     </Content>
     <Content Include="Views\Shared\EditorTemplates\FileEditablePreview.cshtml" />
+    <Content Include="Views\Documents\View.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

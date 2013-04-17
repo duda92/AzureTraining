@@ -27,7 +27,6 @@ public static class MVC
     public static AzureTraining.Web.Controllers.AccountController Account = new AzureTraining.Web.Controllers.T4MVC_AccountController();
     public static AzureTraining.Web.Controllers.DocumentsController Documents = new AzureTraining.Web.Controllers.T4MVC_DocumentsController();
     public static AzureTraining.Web.Controllers.HomeController Home = new AzureTraining.Web.Controllers.T4MVC_HomeController();
-    public static T4MVC.DocumentUploadController DocumentUpload = new T4MVC.DocumentUploadController();
     public static T4MVC.SharedController Shared = new T4MVC.SharedController();
 }
 
@@ -75,6 +74,8 @@ namespace Links
         public static readonly string bootstrap_datepicker_js = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/bootstrap-datepicker.min.js") ? Url("bootstrap-datepicker.min.js") : Url("bootstrap-datepicker.js");
                       
         public static readonly string bootstrap_fileupload_min_js = Url("bootstrap-fileupload.min.js");
+        public static readonly string bootstrap_switch_js = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/bootstrap-switch.min.js") ? Url("bootstrap-switch.min.js") : Url("bootstrap-switch.js");
+                      
         public static readonly string bootstrap_js = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/bootstrap.min.js") ? Url("bootstrap.min.js") : Url("bootstrap.js");
                       
         public static readonly string bootstrap_min_js = Url("bootstrap.min.js");
@@ -154,6 +155,8 @@ namespace Links
         public static readonly string bootstrap_responsive_css = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/bootstrap-responsive.min.css") ? Url("bootstrap-responsive.min.css") : Url("bootstrap-responsive.css");
              
         public static readonly string bootstrap_responsive_min_css = Url("bootstrap-responsive.min.css");
+        public static readonly string bootstrap_switch_css = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/bootstrap-switch.min.css") ? Url("bootstrap-switch.min.css") : Url("bootstrap-switch.css");
+             
         public static readonly string bootstrap_css = T4MVCHelpers.IsProduction() && T4Extensions.FileExists(URLPATH + "/bootstrap.min.css") ? Url("bootstrap.min.css") : Url("bootstrap.css");
              
         public static readonly string bootstrap_min_css = Url("bootstrap.min.css");

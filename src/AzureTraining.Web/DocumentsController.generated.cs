@@ -25,6 +25,9 @@ namespace AzureTraining.Web.Controllers
     public partial class DocumentsController
     {
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public DocumentsController() { }
+
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
         protected DocumentsController(Dummy d) { }
 
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
@@ -41,6 +44,18 @@ namespace AzureTraining.Web.Controllers
             return RedirectToRoutePermanent(callInfo.RouteValueDictionary);
         }
 
+        [NonAction]
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public virtual System.Web.Mvc.ActionResult View()
+        {
+            return new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.View);
+        }
+        [NonAction]
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public virtual System.Web.Mvc.ActionResult ChangeViewPolicy()
+        {
+            return new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.ChangeViewPolicy);
+        }
 
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
         public DocumentsController Actions { get { return MVC.Documents; } }
@@ -58,12 +73,16 @@ namespace AzureTraining.Web.Controllers
         public class ActionNamesClass
         {
             public readonly string Upload = "Upload";
+            public readonly string View = "View";
+            public readonly string ChangeViewPolicy = "ChangeViewPolicy";
         }
 
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
         public class ActionNameConstants
         {
             public const string Upload = "Upload";
+            public const string View = "View";
+            public const string ChangeViewPolicy = "ChangeViewPolicy";
         }
 
 
@@ -75,6 +94,23 @@ namespace AzureTraining.Web.Controllers
         {
             public readonly string model = "model";
         }
+        static readonly ActionParamsClass_View s_params_View = new ActionParamsClass_View();
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public ActionParamsClass_View ViewParams { get { return s_params_View; } }
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public class ActionParamsClass_View
+        {
+            public readonly string documentId = "documentId";
+        }
+        static readonly ActionParamsClass_ChangeViewPolicy s_params_ChangeViewPolicy = new ActionParamsClass_ChangeViewPolicy();
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public ActionParamsClass_ChangeViewPolicy ChangeViewPolicyParams { get { return s_params_ChangeViewPolicy; } }
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public class ActionParamsClass_ChangeViewPolicy
+        {
+            public readonly string documentId = "documentId";
+            public readonly string isShared = "isShared";
+        }
         static readonly ViewsClass s_views = new ViewsClass();
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
         public ViewsClass Views { get { return s_views; } }
@@ -85,7 +121,11 @@ namespace AzureTraining.Web.Controllers
             public _ViewNamesClass ViewNames { get { return s_ViewNames; } }
             public class _ViewNamesClass
             {
+                public readonly string Upload = "Upload";
+                public readonly string View = "View";
             }
+            public readonly string Upload = "~/Views/Documents/Upload.cshtml";
+            public readonly string View = "~/Views/Documents/View.cshtml";
         }
     }
 
@@ -110,6 +150,27 @@ namespace AzureTraining.Web.Controllers
             var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.Upload);
             ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "model", model);
             UploadOverride(callInfo, model);
+            return callInfo;
+        }
+
+        partial void ViewOverride(T4MVC_System_Web_Mvc_ActionResult callInfo, string documentId);
+
+        public override System.Web.Mvc.ActionResult View(string documentId)
+        {
+            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.View);
+            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "documentId", documentId);
+            ViewOverride(callInfo, documentId);
+            return callInfo;
+        }
+
+        partial void ChangeViewPolicyOverride(T4MVC_System_Web_Mvc_ActionResult callInfo, string documentId, bool isShared);
+
+        public override System.Web.Mvc.ActionResult ChangeViewPolicy(string documentId, bool isShared)
+        {
+            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.ChangeViewPolicy);
+            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "documentId", documentId);
+            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "isShared", isShared);
+            ChangeViewPolicyOverride(callInfo, documentId, isShared);
             return callInfo;
         }
 
