@@ -29,6 +29,7 @@
             this.Owner = document.Owner;
             this.Url = document.Url;
             this.IsShared = document.IsShared;
+            this.PartitionKey = document.DocumentId;
         }
 
         private DocumentRow(string partitionKey, string rowKey)

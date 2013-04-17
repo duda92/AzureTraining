@@ -146,10 +146,10 @@ namespace AzureTraining.Core.WindowsAzure
         {
             for (int copyNumber = 0; copyNumber < int.MaxValue; copyNumber++)
             {
-                var docRow = new DocumentRow(document);
                 try
                 {
                     SetUniqueNameAndId(document, copyNumber);
+                    var docRow = new DocumentRow(document);
                     context.AddObject(DocumentsDataContext.DocumentsTable, docRow);
                     context.SaveChanges();
                 }
@@ -168,7 +168,7 @@ namespace AzureTraining.Core.WindowsAzure
             }
         }
 
-        private void SetUniqueNameAndId(Document document, int copyNumber)
+        private void SetUniqueNameAndId(Document document,  int copyNumber)
         {
             var copySuffix = copyNumber == 0 ? string.Empty : string.Format("_{0}", copyNumber);
             var identityString = document.Owner + document.Name + copySuffix;

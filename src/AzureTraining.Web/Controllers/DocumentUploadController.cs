@@ -45,7 +45,7 @@ namespace AzureTraining.Web.Controllers
                 IsShared = model.IsShared
             }, model.Content);
 
-            return RedirectToAction("Upload", "Home");
+            return RedirectToAction(MVC.Home.Index());
         }
 
     }
