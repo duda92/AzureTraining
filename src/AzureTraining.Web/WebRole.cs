@@ -42,7 +42,6 @@ namespace AzureTraining.Web
             dmc.Directories.ScheduledTransferPeriod = TimeSpan.FromMinutes(1.0);
 
             DiagnosticMonitor.Start("Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString", dmc);
-
         }
     }
 }

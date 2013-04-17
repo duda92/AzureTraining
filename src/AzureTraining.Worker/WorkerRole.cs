@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using AzureTraceListeners.Listeners;
 using AzureTraining.Core.WindowsAzure;
 using AzureTraining.Core.WindowsAzure.Helpers;
 using Microsoft.ServiceBus;
@@ -11,6 +12,7 @@ using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.StorageClient;
 using AzureTraining.Core;
+using Microsoft.WindowsAzure.Diagnostics;
 
 namespace AzureTraining.Worker
 {
@@ -47,6 +49,7 @@ namespace AzureTraining.Worker
             });
 
             this.storageAccount = AccountHelper.GetAccount();
+            SetUpLogginForRole();
         }
 
         // QueueClient is thread-safe. Recommended that you cache 
@@ -112,46 +115,68 @@ namespace AzureTraining.Worker
 
             if (doc != null)
             {
-                // create the preview
                 try
                 {
-                    SetDocumentPreview(doc, fileName);
+                    CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+                    CloudBlobContainer container = blobClient.GetContainerReference(doc.Owner);
+                    var blob = container.GetBlobReference(fileName);
+
+                    Trace.TraceInformation("Starting translete owner:{0}, filename:{1}, documentId:{2}", owner, fileName, doc.DocumentId);
+                    TransleteDocument(blob);
+                    Trace.TraceInformation("Finished transleting owner:{0}, filename:{1}, documentId:{2}", owner, fileName, doc.DocumentId);
+                    
+                    Trace.TraceInformation("Starting creating document preview| owner:{0}, filename:{1}, documentId:{2}", owner, fileName, doc.DocumentId);
+                    SetDocumentPreview(doc, blob);
+                    Trace.TraceInformation("Finished creating document preview| owner:{0}, filename:{1}, documentId:{2}", owner, fileName, doc.DocumentId);
+                    
+                    Trace.TraceInformation("Starting pagination| owner:{0}, filename:{1}, documentId:{2}", owner, fileName, doc.DocumentId);
+                    PaginateDocument(blob);
+                    Trace.TraceInformation("Finished pagination| owner:{0}, filename:{1}, documentId:{2}", owner, fileName, doc.DocumentId);
+                    
+                    Trace.TraceInformation("Starting setting document uri| owner:{0}, filename:{1}, documentId:{2}", owner, fileName, doc.DocumentId);
+                    var blobUri = blob.Uri.ToString();
+                    doc.Url = blobUri;
+                    Trace.TraceInformation("Finished setting document uri| owner:{0}, filename:{1}, documentId:{2}", owner, fileName, doc.DocumentId);
+                    
+                    repository.Update(doc);
+
                 }
                 catch (Exception ex)
                 {
-                    // creating the thumbnail failed for some reason
                     Trace.TraceError("SetDocumentPreview failed for {0} and {1}", owner, fileName);
                     Trace.TraceError(ex.ToString());
 
                     return false; 
                 }
-
-                // update table storage with blob data URLs
-                var client = this.storageAccount.CreateCloudBlobClient();
-                var blobUri = client.GetContainerReference(owner).GetBlobReference(fileName).Uri.ToString();
-                
-                doc.Url = blobUri;
-
-                repository.Update(doc);
-
                 return true;
             }
 
-            //Trace.TraceError("Processing document error, cannot find {0}", doc.DocumentId);
+            Trace.TraceError("Processing document error, cannot find {0}", documentId);
             return false;
         }
-  
-        private void SetDocumentPreview(Document doc, string fileName)
-        {
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-            CloudBlobContainer container = blobClient.GetContainerReference(doc.Owner);
-            var blob = container.GetBlobReference(fileName);
-            
-            var content = blob.DownloadText();
 
+        #region DocumentProcessing
+
+        private void PaginateDocument(CloudBlob blob)
+        {
+           
+        }
+  
+        private void TransleteDocument(CloudBlob blob)
+        {
+            var content = blob.DownloadText();
+            string processed = Transliteration.Front(content);
+            blob.UploadText(processed);
+        }
+
+        private void SetDocumentPreview(Document doc, CloudBlob blob)
+        {
+            var content = blob.DownloadText();
             var preview = content.Substring(0, Math.Min(Defines.DocumentPreviewLenght, content.Length));
             doc.Preview = preview;
         }
+
+        #endregion
 
         public override bool OnStart()
         {
@@ -197,6 +222,34 @@ namespace AzureTraining.Worker
             }
 
             return sleepTime;
+        }
+
+        private void SetUpLogginForRole()
+        {
+            DiagnosticMonitorConfiguration dmc = DiagnosticMonitor.GetDefaultInitialConfiguration();
+            dmc.Logs.ScheduledTransferPeriod = TimeSpan.FromMinutes(1);
+            dmc.Logs.ScheduledTransferLogLevelFilter = LogLevel.Error;
+
+            string connectionString = RoleEnvironment.GetConfigurationSettingValue("Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString");
+
+            Trace.Listeners.Add(new AzureTableTraceListener("WebRole", connectionString, "TraceLogs"));
+            //Windows Event Logs
+            dmc.WindowsEventLog.DataSources.Add("System!*");
+            dmc.WindowsEventLog.DataSources.Add("Application!*");
+            dmc.WindowsEventLog.ScheduledTransferPeriod = TimeSpan.FromSeconds(1.0);
+            dmc.WindowsEventLog.ScheduledTransferLogLevelFilter = LogLevel.Warning;
+
+            //Azure Trace Logs
+            dmc.Logs.ScheduledTransferPeriod = TimeSpan.FromMinutes(1.0);
+            dmc.Logs.ScheduledTransferLogLevelFilter = LogLevel.Warning;
+
+            //Crash Dumps
+            CrashDumps.EnableCollection(true);
+
+            //IIS Logs
+            dmc.Directories.ScheduledTransferPeriod = TimeSpan.FromMinutes(1.0);
+
+            DiagnosticMonitor.Start("Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString", dmc);
         }
     }
 }

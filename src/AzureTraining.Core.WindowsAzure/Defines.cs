@@ -10,5 +10,8 @@ namespace AzureTraining.Core.WindowsAzure
         public const string DocumentsCleanupQueue = "cleanupdocuments";
 
         public const int DocumentPreviewLenght = 200;
+
+        public const int DocumentPageLenght = 3000;
+
     }
 }
