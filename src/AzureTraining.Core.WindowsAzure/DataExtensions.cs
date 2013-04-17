@@ -27,7 +27,8 @@ namespace AzureTraining.Core.WindowsAzure
                 Owner = row.Owner,
                 Name = row.Name,
                 Url = row.Url,
-                IsShared = row.IsShared
+                IsShared = row.IsShared,
+                Preview = row.Preview
             };
         }
     }

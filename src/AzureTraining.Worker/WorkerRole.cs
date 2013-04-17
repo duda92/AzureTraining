@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -10,7 +8,6 @@ using AzureTraining.Core.WindowsAzure.Helpers;
 using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.StorageClient;
 using AzureTraining.Core;
@@ -146,7 +143,13 @@ namespace AzureTraining.Worker
   
         private void SetDocumentPreview(Document doc, string fileName)
         {
-            var preview = "filePreview";
+            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+            CloudBlobContainer container = blobClient.GetContainerReference(doc.Owner);
+            var blob = container.GetBlobReference(fileName);
+            
+            var content = blob.DownloadText();
+
+            var preview = content.Substring(0, Math.Min(Defines.DocumentPreviewLenght, content.Length));
             doc.Preview = preview;
         }
 
