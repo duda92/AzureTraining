@@ -17,7 +17,8 @@ namespace AzureTraining.Web.App_Start
                 "~/Scripts/jquery.validate.unobtrusive-custom-for-bootstrap.js",
                 "~/Scripts/bootstrap-fileupload.min.js",
                 "~/Scripts/bootstrap-datepicker.js",
-                "~/Scripts/knockout-2.0.0.js"
+                "~/Scripts/knockout-2.0.0.js",
+                "~/Scripts/bootstrap-switch.js"
                 ));
 
             bundles.Add(new StyleBundle("~/content/css").Include(
@@ -27,7 +28,8 @@ namespace AzureTraining.Web.App_Start
                 "~/Content/bootstrap-mvc-validation.css",
                 "~/Content/bootstrap-fileupload.min.css",
                 "~/Content/datepicker.css",
-                "~/Content/Site.css"
+                "~/Content/Site.css",
+                "~/Content/bootstrap-switch.css"
                 ));
         }
     }

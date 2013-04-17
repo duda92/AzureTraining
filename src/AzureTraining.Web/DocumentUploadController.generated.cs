@@ -20,61 +20,11 @@ using System.Web.Mvc.Ajax;
 using System.Web.Mvc.Html;
 using System.Web.Routing;
 using T4MVC;
-namespace AzureTraining.Web.Controllers
+namespace T4MVC
 {
-    public partial class DocumentUploadController
+    public class DocumentUploadController
     {
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        protected DocumentUploadController(Dummy d) { }
 
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        protected RedirectToRouteResult RedirectToAction(ActionResult result)
-        {
-            var callInfo = result.GetT4MVCResult();
-            return RedirectToRoute(callInfo.RouteValueDictionary);
-        }
-
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        protected RedirectToRouteResult RedirectToActionPermanent(ActionResult result)
-        {
-            var callInfo = result.GetT4MVCResult();
-            return RedirectToRoutePermanent(callInfo.RouteValueDictionary);
-        }
-
-
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        public DocumentUploadController Actions { get { return MVC.DocumentUpload; } }
-        [GeneratedCode("T4MVC", "2.0")]
-        public readonly string Area = "";
-        [GeneratedCode("T4MVC", "2.0")]
-        public readonly string Name = "DocumentUpload";
-        [GeneratedCode("T4MVC", "2.0")]
-        public const string NameConst = "DocumentUpload";
-
-        static readonly ActionNamesClass s_actions = new ActionNamesClass();
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        public ActionNamesClass ActionNames { get { return s_actions; } }
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        public class ActionNamesClass
-        {
-            public readonly string Upload = "Upload";
-        }
-
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        public class ActionNameConstants
-        {
-            public const string Upload = "Upload";
-        }
-
-
-        static readonly ActionParamsClass_Upload s_params_Upload = new ActionParamsClass_Upload();
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        public ActionParamsClass_Upload UploadParams { get { return s_params_Upload; } }
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        public class ActionParamsClass_Upload
-        {
-            public readonly string model = "model";
-        }
         static readonly ViewsClass s_views = new ViewsClass();
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
         public ViewsClass Views { get { return s_views; } }
@@ -91,31 +41,6 @@ namespace AzureTraining.Web.Controllers
         }
     }
 
-    [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-    public partial class T4MVC_DocumentUploadController : AzureTraining.Web.Controllers.DocumentUploadController
-    {
-        public T4MVC_DocumentUploadController() : base(Dummy.Instance) { }
-
-        partial void UploadOverride(T4MVC_System_Web_Mvc_ActionResult callInfo);
-
-        public override System.Web.Mvc.ActionResult Upload()
-        {
-            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.Upload);
-            UploadOverride(callInfo);
-            return callInfo;
-        }
-
-        partial void UploadOverride(T4MVC_System_Web_Mvc_ActionResult callInfo, AzureTraining.Web.Models.DocumentUploadViewModel model);
-
-        public override System.Web.Mvc.ActionResult Upload(AzureTraining.Web.Models.DocumentUploadViewModel model)
-        {
-            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.Upload);
-            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "model", model);
-            UploadOverride(callInfo, model);
-            return callInfo;
-        }
-
-    }
 }
 
 #endregion T4MVC

@@ -44,7 +44,7 @@ namespace AzureTraining.Web
         private void MoveConnectionStringsToConfig(string connectionStringKey)
         {
             string connectionString = RoleEnvironment.GetConfigurationSettingValue(connectionStringKey);
-            // Obtain the RuntimeConfig type. and instance
+            //Obtain the RuntimeConfig type. and instance
             Type runtimeConfig = Type.GetType("System.Web.Configuration.RuntimeConfig, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             var runtimeConfigInstance = runtimeConfig.GetMethod("GetAppConfig", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, null);
 

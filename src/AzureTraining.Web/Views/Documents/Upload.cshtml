@@ -8,7 +8,7 @@
 
 @Html.ValidationSummaryBootstrap()
 
-@using (Html.BeginForm("Upload", "DocumentUpload", FormMethod.Post, new { @class = "form-horizontal" }))
+@using (Html.BeginForm(MVC.Documents.ActionNames.Upload, MVC.Documents.Name, FormMethod.Post, new { @class = "form-horizontal" }))
 {
     <div style="padding: 15px;"></div>
     

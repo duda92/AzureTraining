@@ -26,10 +26,10 @@
                     </button>
                     <div class="nav-collapse collapse">
                         <ul class="nav">
-                            <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                            <li>@Html.ActionLink("Home", MVC.Home.Index())</li>
                             @if (User.Identity.IsAuthenticated)
                             {
-                                <li>@Html.ActionLink("Upload", "Upload", "DocumentUpload")</li> 
+                                <li>@Html.ActionLink("Upload", MVC.Documents.Upload())</li> 
                             }
                         </ul>
                     </div>

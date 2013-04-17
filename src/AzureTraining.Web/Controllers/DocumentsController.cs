@@ -8,20 +8,22 @@ using System.Web.Mvc;
 
 namespace AzureTraining.Web.Controllers
 {
-    public partial class DocumentUploadController : Controller
+    public partial class DocumentsController : Controller
     {
         private readonly IDocumentRepository _repository;
 
-        public DocumentUploadController(IDocumentRepository repository)
+        public DocumentsController(IDocumentRepository repository)
         {
             _repository = repository;
         }
 
-        public DocumentUploadController()
+        public DocumentsController()
             : this(new DocumentRepository())
         {
             
         }
+
+        [Authorize]
         public virtual ActionResult Upload()
         {
             DocumentUploadViewModel documentViewModel = new DocumentUploadViewModel { };
@@ -50,5 +52,12 @@ namespace AzureTraining.Web.Controllers
             return RedirectToAction(MVC.Home.Index());
         }
 
+        [Authorize]
+        public virtual ActionResult View(string documentId)
+        {
+            var owner = DocRolesHelper.CurrentOwnerKey;
+            var document =_repository.GetDocumentById(owner, documentId);
+            return View(document);
+        }
     }
 }
