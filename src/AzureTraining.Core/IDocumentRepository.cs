@@ -14,7 +14,7 @@ namespace AzureTraining.Core
         
         void Add(Document document, string text);
 
-        void Update(Document document, string text, string name);
+        void Update(Document document);
 
         void Share(string documentId);
 

@@ -31,9 +31,8 @@ namespace AzureTraining.Web
             
             Bootstrapper.Initialise();
 
-            //ModelBinders.Binders.Add(typeof(DocumentUploadViewModel), new DocumentUploadViewModelModelBinder());
+            ModelBinders.Binders.Add(typeof(DocumentUploadViewModel), new DocumentUploadViewModelModelBinder());
             
-
             AuthConfig.RegisterAuth();
 
             CloudStorageAccount.SetConfigurationSettingPublisher((configName, configSetter) =>

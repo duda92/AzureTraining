@@ -7,6 +7,6 @@ namespace AzureTraining.Core.WindowsAzure
     {
         public const string DocumentsQueue = "documents";
 
-        public static string DocumentsCleanupQueue = "cleanupdocuments";
+        public const string DocumentsCleanupQueue = "cleanupdocuments";
     }
 }

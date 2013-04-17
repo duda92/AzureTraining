@@ -17,6 +17,8 @@
 
         public bool IsShared { get; set; }
 
+        public string Preview { get; set; }
+
         public DocumentRow() : base()
         {
         }
@@ -30,6 +32,7 @@
             this.Url = document.Url;
             this.IsShared = document.IsShared;
             this.PartitionKey = document.DocumentId;
+            this.Preview = document.Preview;
         }
 
         private DocumentRow(string partitionKey, string rowKey)

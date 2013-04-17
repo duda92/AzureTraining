@@ -8,9 +8,14 @@ namespace AzureTraining.Core.WindowsAzure
     {
         public static IEnumerable<Document> ToModel(this IEnumerable<DocumentRow> rows)
         {
-            foreach (var row in rows)
+            if (rows.ToList() == null)
+                rows = new List<DocumentRow> { };
+            else
             {
-                yield return row.ToModel();
+                foreach (var row in rows)
+                {
+                    yield return row.ToModel();
+                }
             }
         }
 

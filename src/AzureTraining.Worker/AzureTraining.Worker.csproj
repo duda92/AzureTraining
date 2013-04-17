@@ -67,6 +67,16 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AzureTraining.Core.WindowsAzure\AzureTraining.Core.WindowsAzure.csproj">
+      <Project>{6E810A50-41D8-4068-89D6-D62CC35EEA79}</Project>
+      <Name>AzureTraining.Core.WindowsAzure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AzureTraining.Core\AzureTraining.Core.csproj">
+      <Project>{551EAFDE-7698-4464-B3F7-5617BA428560}</Project>
+      <Name>AzureTraining.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

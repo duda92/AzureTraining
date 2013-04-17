@@ -1,5 +1,6 @@
 ﻿using AzureTraining.Core;
 using AzureTraining.Core.WindowsAzure;
+using AzureTraining.Web.Helpers;
 using AzureTraining.Web.Models;
 using System;
 using System.Linq;
@@ -36,14 +37,15 @@ namespace AzureTraining.Web.Controllers
                 return View(model);
             }
 
-            string owner = User.Identity.Name.ToLowerInvariant();
-
-            _repository.Add(new Document
+            var document = new Document
             {
                 Name = model.Name,
-                Owner = owner,
                 IsShared = model.IsShared
-            }, model.Content);
+            };
+
+            DocRolesHelper.SetCurrentUserAsOwnerOfDocument(document);
+
+            _repository.Add(document, model.Content);
 
             return RedirectToAction(MVC.Home.Index());
         }

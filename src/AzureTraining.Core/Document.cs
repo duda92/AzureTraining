@@ -7,7 +7,8 @@ namespace AzureTraining.Core
     {
         public Document()
         {
-            DocumentId = string.Empty; 
+            DocumentId = string.Empty;
+            Preview = string.Empty;
         }
 
         public string DocumentId { get; set; }
@@ -19,5 +20,7 @@ namespace AzureTraining.Core
         public string Owner { get; set; }
 
         public bool IsShared { get; set; }
+
+        public string Preview { get; set; }
     }
 }

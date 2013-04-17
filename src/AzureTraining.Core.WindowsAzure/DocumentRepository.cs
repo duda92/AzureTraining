@@ -45,7 +45,7 @@ namespace AzureTraining.Core.WindowsAzure
         {
             using (var context = new DocumentsDataContext())
             {
-                return context.Documents.Where(p => p.Owner == owner && p.DocumentId == documentId && true).AsTableServiceQuery().AsEnumerable().ToModel().SingleOrDefault();
+                return context.Documents.Where(p => p.Owner == owner && p.DocumentId == documentId).AsTableServiceQuery().AsEnumerable().ToModel().SingleOrDefault();
             }
         }
 
@@ -98,13 +98,11 @@ namespace AzureTraining.Core.WindowsAzure
             throw new NotImplementedException();
         }
 
-        public void Update(Document document, string binary, string name)
+        public void Update(Document document)
         {
             using (var context = new DocumentsDataContext())
             {
                 var documentRow = new DocumentRow(document);
-
-                // attach and update the photo row
                 context.AttachTo(DocumentsDataContext.DocumentsTable, documentRow, "*");
                 context.UpdateObject(documentRow);
                 context.SaveChanges();
