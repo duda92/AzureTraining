@@ -21,7 +21,7 @@ namespace AzureTraining.Core.WindowsAzure
         }
 
         public DocumentRepository()
-            : this(AccountHelper.GetAccount())
+            : this(CloudConfigurationHelper.GetAccount())
         {
         }
 

@@ -27,12 +27,8 @@ namespace AzureTraining.Web.Controllers
 
             var user = User.Identity.Name;
             var documents = _repository.GetAccessDocumentsForUser(user);
-
-            QLog.Logger.LogDebug("documents = ", documents);
-
             var documentsListViewModel = new DocumentsListViewModel(documents);
 
-            QLog.Logger.LogTrace("ViewModelCreated");
             return View(documentsListViewModel);
         }
     }

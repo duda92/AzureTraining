@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
@@ -11,7 +10,6 @@ using AzureTraining.Web.Binders;
 using AzureTraining.Web.Models;
 using Microsoft.WindowsAzure;
 using System.Configuration;
-using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace AzureTraining.Web
 {
@@ -21,9 +19,9 @@ namespace AzureTraining.Web
         {
             AreaRegistration.RegisterAllAreas();
 
-            CloudConfigurationHelper.MoveConnectionStringsToConfig("DefaultConnection");
-            CloudConfigurationHelper.MoveConnectionStringsToConfig("DataConnectionString");
-            CloudConfigurationHelper.MoveConnectionStringsToConfig("QLogDataSource");
+            CloudConfigurationHelper.MoveConnectionStringsToConfig(CloudConfigurationHelper.SettingsKeys.DefaultConnection);
+            CloudConfigurationHelper.MoveConnectionStringsToConfig(CloudConfigurationHelper.SettingsKeys.DataConnectionString);
+            CloudConfigurationHelper.MoveConnectionStringsToConfig(CloudConfigurationHelper.SettingsKeys.QLogDataSource);
             
             WebApiConfig.Register(GlobalConfiguration.Configuration);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

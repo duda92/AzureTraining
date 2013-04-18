@@ -17,7 +17,7 @@
         private readonly Dictionary<string, Type> resolverTypes;
 
         public DocumentsDataContext()
-            : this(AccountHelper.GetAccount())
+            : this(CloudConfigurationHelper.GetAccount())
         {
         }
 

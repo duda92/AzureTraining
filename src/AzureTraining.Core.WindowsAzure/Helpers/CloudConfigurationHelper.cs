@@ -3,11 +3,20 @@ using System.Configuration;
 using System.Linq;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using System.Reflection;
+using Microsoft.WindowsAzure;
 
 namespace AzureTraining.Core.WindowsAzure.Helpers
 {
     public static class CloudConfigurationHelper
     {
+        public static class SettingsKeys 
+        {
+            public const string DefaultConnection = "DefaultConnection";
+            public const string DataConnectionString = "DataConnectionString";
+            public const string QLogDataSource = "QLogDataSource";
+            public const string DiagnosticsConnectionString = "Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString";
+        };
+
         public static void MoveConnectionStringsToConfig(string connectionStringKey)
         {
             string connectionString = RoleEnvironment.GetConfigurationSettingValue(connectionStringKey);
@@ -20,6 +29,11 @@ namespace AzureTraining.Core.WindowsAzure.Helpers
             typeof(ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(connectionStrings, false);
             // Set the SqlConnectionString property.
             ((ConnectionStringsSection)connectionStringSection).ConnectionStrings.Add(new ConnectionStringSettings(connectionStringKey, connectionString, "System.Data.SqlClient"));
+        }
+
+        public static CloudStorageAccount GetAccount()
+        {
+            return CloudStorageAccount.FromConfigurationSetting(SettingsKeys.DataConnectionString);
         }
     }
 }
