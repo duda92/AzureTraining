@@ -25,9 +25,6 @@ namespace AzureTraining.Web.Controllers
     public partial class DocumentsController
     {
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        public DocumentsController() { }
-
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
         protected DocumentsController(Dummy d) { }
 
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]

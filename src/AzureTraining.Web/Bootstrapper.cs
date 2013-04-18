@@ -1,7 +1,8 @@
-using System.Web.Http;
 using AzureTraining.Core;
 using AzureTraining.Core.WindowsAzure;
 using Microsoft.Practices.Unity;
+using System.Web.Mvc;
+using Unity.Mvc4;
 
 namespace AzureTraining.Web
 {
@@ -11,14 +12,17 @@ namespace AzureTraining.Web
         {
             var container = BuildUnityContainer();
 
-            GlobalConfiguration.Configuration.DependencyResolver = new Unity.WebApi.UnityDependencyResolver(container);
+            DependencyResolver.SetResolver(new UnityDependencyResolver(container));
+
+    
         }
 
         private static IUnityContainer BuildUnityContainer()
         {
             var container = new UnityContainer();
 
-            container.RegisterType<IDocumentRepository, DocumentRepository>();            
+            container.RegisterType<IDocumentRepository, DocumentRepository>();
+            container.RegisterType<ILogger, Logger>();            
 
             return container;
         }

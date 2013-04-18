@@ -4,6 +4,7 @@ using System.Linq;
 using System.Transactions;
 using System.Web.Mvc;
 using System.Web.Security;
+using AzureTraining.Core;
 using DotNetOpenAuth.AspNet;
 using Microsoft.Web.WebPages.OAuth;
 using WebMatrix.WebData;
@@ -16,8 +17,12 @@ namespace AzureTraining.Web.Controllers
     [InitializeSimpleMembership]
     public partial class AccountController : Controller
     {
-        //
-        // GET: /Account/Login
+        ILogger _logger;
+
+        public AccountController(ILogger logger)
+        {
+            _logger = logger;
+        }
 
         [AllowAnonymous]
         public virtual ActionResult Login(string returnUrl)
@@ -26,9 +31,6 @@ namespace AzureTraining.Web.Controllers
             return View();
         }
 
-        //
-        // POST: /Account/Login
-
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -36,37 +38,28 @@ namespace AzureTraining.Web.Controllers
         {
             if (ModelState.IsValid && WebSecurity.Login(model.UserName, model.Password, persistCookie: model.RememberMe))
             {
+                _logger.UserLoggedIn(model.UserName);
                 return RedirectToLocal(returnUrl);
             }
 
-            // If we got this far, something failed, redisplay form
             ModelState.AddModelError("", "The user name or password provided is incorrect.");
             return View(model);
         }
-
-        //
-        // POST: /Account/LogOff
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public virtual ActionResult LogOff()
         {
             WebSecurity.Logout();
-
-            return RedirectToAction("Index", "Home");
+            _logger.UserLoggedOut(User.Identity.Name);
+            return RedirectToAction(MVC.Home.Index());
         }
-
-        //
-        // GET: /Account/Register
 
         [AllowAnonymous]
         public virtual ActionResult Register()
         {
             return View();
         }
-
-        //
-        // POST: /Account/Register
 
         [HttpPost]
         [AllowAnonymous]
@@ -75,25 +68,21 @@ namespace AzureTraining.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Attempt to register the user
                 try
                 {
                     WebSecurity.CreateUserAndAccount(model.UserName, model.Password);
                     WebSecurity.Login(model.UserName, model.Password);
-                    return RedirectToAction("Index", "Home");
+                    
+                    _logger.UserRegistered(model.UserName);
+                    return RedirectToAction(MVC.Home.Index());
                 }
                 catch (MembershipCreateUserException e)
                 {
                     ModelState.AddModelError("", ErrorCodeToString(e.StatusCode));
                 }
             }
-
-            // If we got this far, something failed, redisplay form
             return View(model);
         }
-
-        //
-        // POST: /Account/Disassociate
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -102,10 +91,8 @@ namespace AzureTraining.Web.Controllers
             string ownerAccount = OAuthWebSecurity.GetUserName(provider, providerUserId);
             ManageMessageId? message = null;
 
-            // Only disassociate the account if the currently logged in user is the owner
             if (ownerAccount == User.Identity.Name)
             {
-                // Use a transaction to prevent the user from deleting their last login credential
                 using (var scope = new TransactionScope(TransactionScopeOption.Required, new TransactionOptions { IsolationLevel = IsolationLevel.Serializable }))
                 {
                     bool hasLocalAccount = OAuthWebSecurity.HasLocalAccount(WebSecurity.GetUserId(User.Identity.Name));
@@ -118,11 +105,8 @@ namespace AzureTraining.Web.Controllers
                 }
             }
 
-            return RedirectToAction("Manage", new { Message = message });
+            return RedirectToAction(MVC.Account.ActionNames.Manage, new { Message = message });
         }
-
-        //
-        // GET: /Account/Manage
 
         public virtual ActionResult Manage(ManageMessageId? message)
         {
@@ -136,9 +120,6 @@ namespace AzureTraining.Web.Controllers
             return View();
         }
 
-        //
-        // POST: /Account/Manage
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public virtual ActionResult Manage(LocalPasswordModel model)
@@ -150,7 +131,6 @@ namespace AzureTraining.Web.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    // ChangePassword will throw an exception rather than return false in certain failure scenarios.
                     bool changePasswordSucceeded;
                     try
                     {
@@ -173,8 +153,6 @@ namespace AzureTraining.Web.Controllers
             }
             else
             {
-                // User does not have a local password so remove any validation errors caused by a missing
-                // OldPassword field
                 ModelState state = ModelState["OldPassword"];
                 if (state != null)
                 {
@@ -195,12 +173,8 @@ namespace AzureTraining.Web.Controllers
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return View(model);
         }
-
-        //
-        // POST: /Account/ExternalLogin
 
         [HttpPost]
         [AllowAnonymous]
@@ -209,9 +183,6 @@ namespace AzureTraining.Web.Controllers
         {
             return new ExternalLoginResult(provider, Url.Action("ExternalLoginCallback", new { ReturnUrl = returnUrl }));
         }
-
-        //
-        // GET: /Account/ExternalLoginCallback
 
         [AllowAnonymous]
         public virtual ActionResult ExternalLoginCallback(string returnUrl)
@@ -229,22 +200,17 @@ namespace AzureTraining.Web.Controllers
 
             if (User.Identity.IsAuthenticated)
             {
-                // If the current user is logged in add the new account
                 OAuthWebSecurity.CreateOrUpdateAccount(result.Provider, result.ProviderUserId, User.Identity.Name);
                 return RedirectToLocal(returnUrl);
             }
             else
             {
-                // User is new, ask for their desired membership name
                 string loginData = OAuthWebSecurity.SerializeProviderUserId(result.Provider, result.ProviderUserId);
                 ViewBag.ProviderDisplayName = OAuthWebSecurity.GetOAuthClientData(result.Provider).DisplayName;
                 ViewBag.ReturnUrl = returnUrl;
                 return View("ExternalLoginConfirmation", new RegisterExternalLoginModel { UserName = result.UserName, ExternalLoginData = loginData });
             }
         }
-
-        //
-        // POST: /Account/ExternalLoginConfirmation
 
         [HttpPost]
         [AllowAnonymous]
@@ -256,19 +222,16 @@ namespace AzureTraining.Web.Controllers
 
             if (User.Identity.IsAuthenticated || !OAuthWebSecurity.TryDeserializeProviderUserId(model.ExternalLoginData, out provider, out providerUserId))
             {
-                return RedirectToAction("Manage");
+                return RedirectToAction(MVC.Account.ActionNames.Manage);
             }
 
             if (ModelState.IsValid)
             {
-                // Insert a new user into the database
                 using (UsersContext db = new UsersContext())
                 {
                     UserProfile user = db.UserProfiles.FirstOrDefault(u => u.UserName.ToLower() == model.UserName.ToLower());
-                    // Check if user already exists
                     if (user == null)
                     {
-                        // Insert name into the profile table
                         db.UserProfiles.Add(new UserProfile { UserName = model.UserName });
                         db.SaveChanges();
 
@@ -288,9 +251,6 @@ namespace AzureTraining.Web.Controllers
             ViewBag.ReturnUrl = returnUrl;
             return View(model);
         }
-
-        //
-        // GET: /Account/ExternalLoginFailure
 
         [AllowAnonymous]
         public virtual ActionResult ExternalLoginFailure()
@@ -336,7 +296,7 @@ namespace AzureTraining.Web.Controllers
             }
             else
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction(MVC.Home.Index());
             }
         }
 

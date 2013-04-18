@@ -17,6 +17,8 @@ namespace AzureTraining.Worker
     public class WorkerRole : RoleEntryPoint
     {
         private readonly CloudStorageAccount storageAccount;
+        private readonly ILogger _logger;
+
 
         public WorkerRole()
         {
@@ -108,26 +110,26 @@ namespace AzureTraining.Worker
             var fileName = parts[2];
 
             var repository = new DocumentRepository();
-            var doc = repository.GetDocumentById(owner, documentId);
+            var document = repository.GetDocumentById(owner, documentId);
 
-            if (doc != null)
+            if (document != null)
             {
                 try
                 {
                     CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-                    CloudBlobContainer container = blobClient.GetContainerReference(doc.Owner);
+                    CloudBlobContainer container = blobClient.GetContainerReference(document.Owner);
                     var blob = container.GetBlobReference(fileName);
 
                     TransleteDocument(blob);
                     
-                    SetDocumentPreview(doc, blob);
+                    SetDocumentPreview(document, blob);
                     
                     PaginateDocument(blob);
                     
                     var blobUri = blob.Uri.ToString();
-                    doc.Url = blobUri;
+                    document.Url = blobUri;
                     
-                    repository.Update(doc);
+                    repository.Update(document);
 
                 }
                 catch (Exception ex)
@@ -137,6 +139,7 @@ namespace AzureTraining.Worker
 
                     return false; 
                 }
+                _logger.DocumentProcessingFinished(document.Name, document.Owner);
                 return true;
             }
 

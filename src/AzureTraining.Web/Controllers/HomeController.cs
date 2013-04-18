@@ -23,8 +23,6 @@ namespace AzureTraining.Web.Controllers
 
         public virtual ActionResult Index()
         {
-            QLog.Logger.LogTrace("/Home/Index called");
-
             var user = User.Identity.Name;
             var documents = _repository.GetAccessDocumentsForUser(user);
             var documentsListViewModel = new DocumentsListViewModel(documents);

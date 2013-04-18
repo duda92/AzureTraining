@@ -154,8 +154,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\TwitterBootstrapMVC.1.0.7\lib\net40\TwitterBootstrapMVC.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.WebApi">
-      <HintPath>..\packages\Unity.WebAPI.0.10\lib\net40\Unity.WebApi.dll</HintPath>
+    <Reference Include="Unity.Mvc4">
+      <HintPath>..\packages\Unity.Mvc4.1.1.0.0\lib\net40\Unity.Mvc4.dll</HintPath>
     </Reference>
     <Reference Include="WebMatrix.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -377,6 +377,7 @@
     <Content Include="Scripts\modernizr-2.5.3.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="T4MVC.tt.settings.xml" />
+    <Content Include="Unity.Mvc4.README.txt" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

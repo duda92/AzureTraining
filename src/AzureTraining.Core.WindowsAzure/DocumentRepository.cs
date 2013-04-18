@@ -15,14 +15,9 @@ namespace AzureTraining.Core.WindowsAzure
 
         private readonly CloudStorageAccount storageAccount;
 
-        public DocumentRepository(CloudStorageAccount account)
-        {
-            this.storageAccount = account;
-        }
-
         public DocumentRepository()
-            : this(CloudConfigurationHelper.GetAccount())
         {
+            this.storageAccount = CloudConfigurationHelper.GetAccount();
         }
 
         public IEnumerable<Document> GetAccessDocumentsForUser(string user)

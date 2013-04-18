@@ -1,5 +1,4 @@
 ﻿using AzureTraining.Core;
-using AzureTraining.Core.WindowsAzure;
 using AzureTraining.Web.Helpers;
 using AzureTraining.Web.Models;
 using System;
@@ -10,7 +9,14 @@ namespace AzureTraining.Web.Controllers
 {
     public partial class DocumentsController : Controller
     {
-        private readonly IDocumentRepository _repository = new DocumentRepository();
+        private readonly IDocumentRepository _repository;
+        private readonly ILogger _logger;
+
+        public DocumentsController(IDocumentRepository repository, ILogger logger)
+        {
+            _repository = repository;
+            _logger = logger;
+        }
 
         [Authorize]
         public virtual ActionResult Upload()
@@ -38,6 +44,7 @@ namespace AzureTraining.Web.Controllers
 
             _repository.Add(document, model.Content);
 
+            _logger.DocumentUploaded(document.Name, document.Owner);
             return RedirectToAction(MVC.Home.Index());
         }
 
@@ -62,6 +69,7 @@ namespace AzureTraining.Web.Controllers
             var document = _repository.GetDocumentById(owner, documentId);
             document.IsShared = isShared;
             _repository.Update(document);
+            _logger.DocumentChangedPolicy(owner, document.Name, document.IsShared);
             return RedirectToAction(MVC.Home.Index());
         }
     }

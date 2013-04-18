@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="IDocumentRepository.cs" />
     <Compile Include="Document.cs" />
+    <Compile Include="ILogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
