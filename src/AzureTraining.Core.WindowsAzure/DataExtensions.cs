@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QLog.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,6 +30,30 @@ namespace AzureTraining.Core.WindowsAzure
                 Url = row.Url,
                 IsShared = row.IsShared,
                 Preview = row.Preview
+            };
+        }
+
+        public static IEnumerable<UserLog> ToModel(this IEnumerable<QLogEntry> rows)
+        {
+            if (rows.ToList() == null)
+                rows = new List<QLogEntry> { };
+            else
+            {
+                foreach (var row in rows)
+                {
+                    yield return row.ToModel();
+                }
+            }
+        }
+
+        public static UserLog ToModel(this QLogEntry row)
+        {
+            var parts = row.Message.Split(new char [] { '|' } , StringSplitOptions.RemoveEmptyEntries);
+            var user = parts[0];
+
+            return new UserLog()
+            {
+                User = user
             };
         }
     }

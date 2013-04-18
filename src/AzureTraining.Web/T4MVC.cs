@@ -27,6 +27,7 @@ public static class MVC
     public static AzureTraining.Web.Controllers.AccountController Account = new AzureTraining.Web.Controllers.T4MVC_AccountController();
     public static AzureTraining.Web.Controllers.DocumentsController Documents = new AzureTraining.Web.Controllers.T4MVC_DocumentsController();
     public static AzureTraining.Web.Controllers.HomeController Home = new AzureTraining.Web.Controllers.T4MVC_HomeController();
+    public static AzureTraining.Web.Controllers.LogsController Logs = new AzureTraining.Web.Controllers.T4MVC_LogsController();
     public static T4MVC.SharedController Shared = new T4MVC.SharedController();
 }
 

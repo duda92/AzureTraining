@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AzureTraining.Core
 {
     public interface ILogger
     {
+        IEnumerable<UserLog> GetLogs(string login);
+
         void UserLoggedIn(string login);
 
         void UserLoggedOut(string login);

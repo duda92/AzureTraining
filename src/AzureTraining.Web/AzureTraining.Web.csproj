@@ -68,10 +68,6 @@
       <HintPath>..\packages\WindowsAzure.Storage.2.0.5.1\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.StorageClient, Version=1.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="QLog, Version=1.4.6.0, Culture=neutral, PublicKeyToken=4d9101593592977d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\QLog.1.4.6\lib\QLog.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Entity" />
@@ -237,6 +233,7 @@
     <Compile Include="Controllers\DocumentsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Binders\DocumentUploadViewModelModelBinder.cs" />
+    <Compile Include="Controllers\LogsController.cs" />
     <Compile Include="DocumentsController.generated.cs">
       <DependentUpon>T4MVC.tt</DependentUpon>
     </Compile>
@@ -247,6 +244,9 @@
     <Compile Include="Helpers\DocRolesHelper.cs" />
     <Compile Include="Helpers\HtmlExtensionMethods.cs" />
     <Compile Include="HomeController.generated.cs">
+      <DependentUpon>T4MVC.tt</DependentUpon>
+    </Compile>
+    <Compile Include="LogsController.generated.cs">
       <DependentUpon>T4MVC.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountModels.cs" />
@@ -425,6 +425,7 @@
     </Content>
     <Content Include="Views\Shared\EditorTemplates\FileEditablePreview.cshtml" />
     <Content Include="Views\Documents\View.cshtml" />
+    <Content Include="Views\Logs\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

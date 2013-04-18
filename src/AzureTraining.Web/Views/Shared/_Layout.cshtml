@@ -30,6 +30,7 @@
                             @if (User.Identity.IsAuthenticated)
                             {
                                 <li>@Html.ActionLink("Upload", MVC.Documents.Upload())</li> 
+                                <li>@Html.ActionLink("Logs", MVC.Logs.Index())</li>
                             }
                         </ul>
                     </div>
