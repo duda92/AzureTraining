@@ -6,6 +6,7 @@
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
       <Setting name="DataConnectionString" value="UseDevelopmentStorage=true" />
       <Setting name="DefaultConnection" value="Server=tcp:t59mmz5sqw.database.windows.net,1433;Database=AzureTrainingDev;User ID=bdudnik@t59mmz5sqw;Password=Dudadudl1###;Trusted_Connection=False;Encrypt=True;Connection Timeout=30;prividerName=System.Data.SqlClient" />
+      <Setting name="QLogDataSource" value="UseDevelopmentStorage=true" />
     </ConfigurationSettings>
   </Role>
   <Role name="AzureTraining.Worker">

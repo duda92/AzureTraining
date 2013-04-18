@@ -5,6 +5,7 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using AzureTraining.Core.WindowsAzure.Helpers;
 using AzureTraining.Web.App_Start;
 using AzureTraining.Web.Binders;
 using AzureTraining.Web.Models;
@@ -20,8 +21,9 @@ namespace AzureTraining.Web
         {
             AreaRegistration.RegisterAllAreas();
 
-            MoveConnectionStringsToConfig("DefaultConnection");
-            MoveConnectionStringsToConfig("DataConnectionString");
+            CloudConfigurationHelper.MoveConnectionStringsToConfig("DefaultConnection");
+            CloudConfigurationHelper.MoveConnectionStringsToConfig("DataConnectionString");
+            CloudConfigurationHelper.MoveConnectionStringsToConfig("QLogDataSource");
             
             WebApiConfig.Register(GlobalConfiguration.Configuration);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
@@ -41,18 +43,5 @@ namespace AzureTraining.Web
             });
         }
 
-        private void MoveConnectionStringsToConfig(string connectionStringKey)
-        {
-            string connectionString = RoleEnvironment.GetConfigurationSettingValue(connectionStringKey);
-            //Obtain the RuntimeConfig type. and instance
-            Type runtimeConfig = Type.GetType("System.Web.Configuration.RuntimeConfig, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
-            var runtimeConfigInstance = runtimeConfig.GetMethod("GetAppConfig", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, null);
-
-            var connectionStringSection = runtimeConfig.GetProperty("ConnectionStrings", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(runtimeConfigInstance, null);
-            var connectionStrings = connectionStringSection.GetType().GetProperty("ConnectionStrings", BindingFlags.Public | BindingFlags.Instance).GetValue(connectionStringSection, null);
-            typeof(ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(connectionStrings, false);
-            // Set the SqlConnectionString property.
-            ((ConnectionStringsSection)connectionStringSection).ConnectionStrings.Add(new ConnectionStringSettings(connectionStringKey, connectionString, "System.Data.SqlClient"));
-        }
     }
 }

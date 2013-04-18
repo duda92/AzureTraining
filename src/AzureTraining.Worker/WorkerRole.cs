@@ -18,7 +18,6 @@ namespace AzureTraining.Worker
 {
     public class WorkerRole : RoleEntryPoint
     {
-
         private readonly CloudStorageAccount storageAccount;
 
         public WorkerRole()

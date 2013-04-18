@@ -17,6 +17,7 @@
     <ConfigurationSettings>
       <Setting name="DataConnectionString" />
       <Setting name="DefaultConnection" />
+      <Setting name="QLogDataSource" />
     </ConfigurationSettings>
   </WebRole>
   <WorkerRole name="AzureTraining.Worker" vmsize="Small">
