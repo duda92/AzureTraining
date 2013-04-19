@@ -42,6 +42,7 @@
     <Compile Include="IDocumentRepository.cs" />
     <Compile Include="Document.cs" />
     <Compile Include="IAzureLogger.cs" />
+    <Compile Include="PaginationService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserLog.cs" />
   </ItemGroup>

@@ -253,6 +253,7 @@
       <DependentUpon>T4MVC.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountModels.cs" />
+    <Compile Include="Models\DocumentPageViewViewModel.cs" />
     <Compile Include="Models\DocumentsListViewModel.cs" />
     <Compile Include="Models\DocumentUploadViewModel.cs" />
     <Compile Include="Models\DocumentViewViewModel.cs" />
@@ -429,6 +430,7 @@
     <Content Include="Views\Shared\EditorTemplates\FileEditablePreview.cshtml" />
     <Content Include="Views\Documents\View.cshtml" />
     <Content Include="Views\Logs\Index.cshtml" />
+    <Content Include="Views\Documents\ViewDocumentPage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

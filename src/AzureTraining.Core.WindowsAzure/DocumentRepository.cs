@@ -92,6 +92,19 @@ namespace AzureTraining.Core.WindowsAzure
             }
         }
 
+        public string GetPageContent(string owner, string documentId, string fileName, int page)
+        {
+            using (var context = new DocumentsDataContext())
+            {
+                var docs = context.Documents.Where(p => p.Owner == owner).ToModel();
+                var doc = docs.FirstOrDefault();
+                var documentContent = GetDocumentText(doc);
+                var paginationService = new PaginationService();
+                var content = paginationService.GetDocumentPage(documentContent, page);
+                return content;
+            }
+        }
+
         public void BootstrapUser(string userName)
         {
             // provision a container for the user's blobs
@@ -169,6 +182,15 @@ namespace AzureTraining.Core.WindowsAzure
             blob.Properties.ContentType = ContentType;
             blob.UploadText(text);
             return fileName;
+        }
+
+        private string GetDocumentText(Document document)
+        {
+            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+            CloudBlobContainer container = blobClient.GetContainerReference(document.Owner);
+            var blob = container.GetBlobReference(document.Name);
+            var text = blob.DownloadText();
+            return text;
         }
     }
 }

@@ -11,7 +11,7 @@
                 <h3>@page</h3>
                 <p>Here could be page preview</p>
                 <p>
-                    <a href="#" class="btn btn-primary">View</a> 
+                    @Html.ActionLink("View", MVC.Documents.ViewDocumentPage(Model.Document.Name, Model.Document.DocumentId, page), new { @class = "btn btn-primary" })
                 </p>
             </div>
         </div>

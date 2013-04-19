@@ -3,12 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 
-namespace AzureTraining.Worker
+namespace AzureTraining.Core
 {
     public class PaginationService
     {
         public const int PageSize = 50;
 
+        public string GetDocumentPage(string documentContent, int page)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(documentContent);
+            var node = doc.SelectSingleNode(string.Format("//Page[@number='{0}']", page));
+            return node.InnerText;
+        }
+        
         public string Paginate(string input, out int pagesCount)
         {
             if (Paginated(input))

@@ -63,6 +63,21 @@ namespace AzureTraining.Web.Controllers
         }
 
         [Authorize]
+        public virtual ActionResult ViewDocumentPage(string fileName, string documentId, int page)
+        {
+            var owner = DocRolesHelper.CurrentOwnerKey;
+
+            var content = _repository.GetPageContent(owner, documentId, fileName, page);
+
+            var viewModel = new DocumentPageViewViewModel
+            {
+                Text = content
+            };
+
+            return View(viewModel);
+        }
+
+        [Authorize]
         public virtual ActionResult ChangeViewPolicy(string documentId, bool isShared)
         {
             var owner = DocRolesHelper.CurrentOwnerKey;
@@ -73,4 +88,6 @@ namespace AzureTraining.Web.Controllers
             return RedirectToAction(MVC.Home.Index());
         }
     }
+  
+    
 }

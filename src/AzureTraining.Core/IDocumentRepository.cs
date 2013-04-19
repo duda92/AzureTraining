@@ -6,6 +6,8 @@ namespace AzureTraining.Core
 {
     public interface IDocumentRepository
     {
+        string GetPageContent(string owner, string documentId, string fileName, int page);
+
         IEnumerable<Document> GetDocumentsByOwner(string owner);
 
         IEnumerable<Document> GetAccessDocumentsForUser(string user);
@@ -19,7 +21,5 @@ namespace AzureTraining.Core
         void Delete(string documentId);
 
         void BootstrapUser(string userName);
-
-        
     }
 }

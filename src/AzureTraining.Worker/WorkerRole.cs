@@ -94,7 +94,7 @@ namespace AzureTraining.Worker
                 }
             }
         }
-
+  
         private bool ProcessDocument(CloudQueueMessage msg)
         {
             var parts = msg.AsString.Split('|');
@@ -223,6 +223,16 @@ namespace AzureTraining.Worker
             }
 
             return sleepTime;
+        }
+
+        private void SendToQueue(string queueName, string msg)
+        {
+            var queues = this.storageAccount.CreateCloudQueueClient();
+
+            // TODO: add error handling and retry logic
+            var q = queues.GetQueueReference(queueName);
+            q.CreateIfNotExist();
+            q.AddMessage(new CloudQueueMessage(msg));
         }
     }
 }
