@@ -51,10 +51,21 @@ namespace AzureTraining.Core.WindowsAzure
         {
             using (var context = new LogsDataContext())
             {
-                var logs = context.LogEntries.Where(x => x.User == login).ToModel();
+                var logs = context.LogEntries.Where(x => x.User == login).ToList().ToModel();
                 return logs;
             }
         }
+
+        public IEnumerable<UserLog> GetLogsForDocument(string login, string documentName)
+        {
+            using (var context = new LogsDataContext())
+            {
+                var logs = context.LogEntries.Where(x => x.User == login && x.DocumentName == documentName).ToList().ToModel();
+                return logs;
+            }
+        }
+
+        
     }
 
 

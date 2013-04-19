@@ -6,6 +6,8 @@ namespace AzureTraining.Core
 {
     public interface IAzureLogger
     {
+        IEnumerable<UserLog> GetLogsForDocument(string login, string documentName);
+
         IEnumerable<UserLog> GetLogs(string login);
 
         void UserLoggedIn(string login);

@@ -48,12 +48,13 @@ namespace AzureTraining.Core.WindowsAzure
 
         public static UserLog ToModel(this QLogEntry row)
         {
-            var parts = row.Message.Split(new char [] { '|' } , StringSplitOptions.RemoveEmptyEntries);
-            var user = parts[0];
-
             return new UserLog()
             {
-                User = user
+                User = row.User,
+                Date = row.CreatedOn,
+                DocumentId = row.DocumentId, 
+                DocumentName = row.DocumentName,
+                Message = row.Message
             };
         }
     }

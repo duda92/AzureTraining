@@ -67,6 +67,16 @@ namespace AzureTraining.Web.Controllers
         }
 
 
+        static readonly ActionParamsClass_Index s_params_Index = new ActionParamsClass_Index();
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public ActionParamsClass_Index IndexParams { get { return s_params_Index; } }
+        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
+        public class ActionParamsClass_Index
+        {
+            public readonly string page = "page";
+            public readonly string documentName = "documentName";
+            public readonly string orderByDate = "orderByDate";
+        }
         static readonly ViewsClass s_views = new ViewsClass();
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
         public ViewsClass Views { get { return s_views; } }
@@ -88,12 +98,15 @@ namespace AzureTraining.Web.Controllers
     {
         public T4MVC_LogsController() : base(Dummy.Instance) { }
 
-        partial void IndexOverride(T4MVC_System_Web_Mvc_ActionResult callInfo);
+        partial void IndexOverride(T4MVC_System_Web_Mvc_ActionResult callInfo, int page, string documentName, bool orderByDate);
 
-        public override System.Web.Mvc.ActionResult Index()
+        public override System.Web.Mvc.ActionResult Index(int page, string documentName, bool orderByDate)
         {
             var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.Index);
-            IndexOverride(callInfo);
+            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "page", page);
+            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "documentName", documentName);
+            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "orderByDate", orderByDate);
+            IndexOverride(callInfo, page, documentName, orderByDate);
             return callInfo;
         }
 

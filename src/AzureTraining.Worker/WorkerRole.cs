@@ -138,7 +138,7 @@ namespace AzureTraining.Worker
 
                     return false; 
                 }
-                _logger.DocumentProcessingFinished(document.Name, document.Owner);
+                _logger.DocumentProcessingFinished(document.Owner, document.Name);
                 return true;
             }
 
