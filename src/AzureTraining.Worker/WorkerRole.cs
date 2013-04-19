@@ -17,7 +17,7 @@ namespace AzureTraining.Worker
     public class WorkerRole : RoleEntryPoint
     {
         private readonly CloudStorageAccount storageAccount;
-        private readonly ILogger _logger = new Logger();
+        private readonly IAzureLogger _logger = new AzureLogger();
 
         public WorkerRole()
         {

@@ -8,9 +8,9 @@ namespace AzureTraining.Web.Controllers
     [Authorize]
     public partial class LogsController : Controller
     {
-        private ILogger _logger;
+        private IAzureLogger _logger;
 
-        public LogsController(ILogger logger)
+        public LogsController(IAzureLogger logger)
         {
             this._logger = logger; 
         }

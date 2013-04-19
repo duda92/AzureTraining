@@ -21,5 +21,9 @@ namespace QLog.Models
         public string InstanceId { get; set; }
         public string DeploymentId { get; set; }
         public DateTime CreatedOn { get; set; }
+
+        public string DocumentId { get; set; }
+        public string DocumentName { get; set; }
+        public string User { get; set; }
     }
 }

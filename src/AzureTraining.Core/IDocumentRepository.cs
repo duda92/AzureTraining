@@ -16,10 +16,6 @@ namespace AzureTraining.Core
 
         void Update(Document document);
 
-        void Share(string documentId);
-
-        void StopShare(string documentId);
-
         void Delete(string documentId);
 
         void BootstrapUser(string userName);

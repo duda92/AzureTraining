@@ -17,9 +17,9 @@ namespace AzureTraining.Web.Controllers
     [InitializeSimpleMembership]
     public partial class AccountController : Controller
     {
-        ILogger _logger;
+        IAzureLogger _logger;
 
-        public AccountController(ILogger logger)
+        public AccountController(IAzureLogger logger)
         {
             _logger = logger;
         }

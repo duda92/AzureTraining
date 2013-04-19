@@ -81,18 +81,6 @@ namespace AzureTraining.Core.WindowsAzure
                 string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.DocumentId, document.Owner, document.Url));
         }
 
-        public void Share(string documentId)
-        {
-            // TODO: Implement this method
-            throw new NotImplementedException();
-        }
-
-        public void StopShare(string documentId)
-        {
-            // TODO: Implement this method
-            throw new NotImplementedException();
-        }
-
         public void Update(Document document)
         {
             using (var context = new DocumentsDataContext())

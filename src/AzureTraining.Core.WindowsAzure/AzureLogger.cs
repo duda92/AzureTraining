@@ -4,53 +4,54 @@ using System.Linq;
 using AzureTraining.Core.WindowsAzure.Helpers;
 using Microsoft.WindowsAzure.StorageClient;
 using QLog.Models;
+using QLog;
 
 namespace AzureTraining.Core.WindowsAzure
 {
-    public class Logger : ILogger
+    public class AzureLogger : IAzureLogger
     {
         public void DocumentProcessingFinished(string owner, string documentName)
         {
-            QLog.Logger.LogTrace(string.Format("Document processed |{0}|{1}", owner, documentName));  
+            var customLogInfo = new CustomLogInfo { DocumentName = documentName, User = owner, Message = "Document processed" };
+            QLog.Logger.LogTrace(customLogInfo);
         }
 
         public void DocumentChangedPolicy(string owner, string documentName, bool isShared)
         {
-            if (isShared)
-            {
-                QLog.Logger.LogTrace(string.Format("Document is Shared |{0}|{1}", owner, documentName));
-            }
-            else
-            {
-                QLog.Logger.LogTrace(string.Format("Document is Protected |{0}|{1}", owner, documentName));
-            }
+            var customLogInfo = new CustomLogInfo { DocumentName = documentName, User = owner };
+            customLogInfo.Message = isShared ? "Document is Shared" : "Document is Protected";
+            QLog.Logger.LogTrace(customLogInfo);
         }
 
         public void DocumentUploaded(string documentName, string login)
         {
-            QLog.Logger.LogTrace(string.Format("Document uploaded to the cloud |{0}|{1}", login, documentName));     
+            var customLogInfo = new CustomLogInfo { Message = "Document uploaded to the cloud", DocumentName = documentName, User = login };
+            QLog.Logger.LogTrace(customLogInfo);     
         }
 
         public void UserLoggedIn(string login)
         {
-            QLog.Logger.LogTrace(string.Format("User logined |{0}", login));     
+            var customLogInfo = new CustomLogInfo { Message = "User logined", User = login };
+            QLog.Logger.LogTrace(customLogInfo);        
         }
 
         public void UserLoggedOut(string login)
         {
-            QLog.Logger.LogTrace(string.Format("User logged out |{0}", login));
+            var customLogInfo = new CustomLogInfo { Message = "User logged out", User = login };
+            QLog.Logger.LogTrace(customLogInfo);
         }
 
         public void UserRegistered(string login)
         {
-            QLog.Logger.LogTrace(string.Format("User registered |{0}", login));
+            var customLogInfo = new CustomLogInfo { Message = "User registered", User = login };
+            QLog.Logger.LogTrace(customLogInfo);
         }
 
         public IEnumerable<UserLog> GetLogs(string login)
         {
             using (var context = new LogsDataContext())
             {
-                var logs = context.LogEntries.ToModel();
+                var logs = context.LogEntries.Where(x => x.User == login).ToModel();
                 return logs;
             }
         }
@@ -59,7 +60,7 @@ namespace AzureTraining.Core.WindowsAzure
 
     public class LogsDataContext : TableServiceContext, IDisposable
     {
-        public const string LogsTable = "qlog20130418";
+        public const string LogsTable = "qlog";
 
         public LogsDataContext()
             : this(CloudConfigurationHelper.GetAccount())

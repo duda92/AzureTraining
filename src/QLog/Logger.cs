@@ -15,8 +15,10 @@ namespace QLog
     /// <summary>
     /// Main tool that is responsible for logging
     /// </summary>
-    public static class Logger
+    public static partial class Logger
     {
+        const string DefaultExceptionMessage = "Exception";
+        
         /// <summary>
         /// Writes a log at the QTrace area with a specified message
         /// </summary>
@@ -42,7 +44,7 @@ namespace QLog
         /// <param name="e"></param>
         public static void LogTrace(Exception e)
         {
-            DoLog<QTrace>(null, e);
+            DoLog<QTrace>(DefaultExceptionMessage, e);
         }
 
         /// <summary>
@@ -80,7 +82,7 @@ namespace QLog
         /// <param name="e"></param>
         public static void LogDebug(Exception e)
         {
-            DoLog<QDebug>(null, e);
+            DoLog<QDebug>(DefaultExceptionMessage, e);
         }
 
         /// <summary>
@@ -118,7 +120,7 @@ namespace QLog
         /// <param name="e"></param>
         public static void LogInfo(Exception e)
         {
-            DoLog<QInfo>(null, e);
+            DoLog<QInfo>(DefaultExceptionMessage, e);
         }
 
         /// <summary>
@@ -156,7 +158,7 @@ namespace QLog
         /// <param name="e"></param>
         public static void LogWarn(Exception e)
         {
-            DoLog<QWarn>(null, e);
+            DoLog<QWarn>(DefaultExceptionMessage, e);
         }
 
         /// <summary>
@@ -194,7 +196,7 @@ namespace QLog
         /// <param name="e"></param>
         public static void LogError(Exception e)
         {
-            DoLog<QError>(null, e);
+            DoLog<QError>(DefaultExceptionMessage, e);
         }
 
         /// <summary>
@@ -232,7 +234,7 @@ namespace QLog
         /// <param name="e"></param>
         public static void LogCritical(Exception e)
         {
-            DoLog<QCritical>(null, e);
+            DoLog<QCritical>(DefaultExceptionMessage, e);
         }
 
         /// <summary>
@@ -273,7 +275,7 @@ namespace QLog
         /// <param name="e"></param>
         public static void Log<Area>(Exception e) where Area : QArea
         {
-            DoLog<Area>(null, e);
+            DoLog<Area>(DefaultExceptionMessage, e);
         }
 
         /// <summary>
@@ -386,7 +388,7 @@ namespace QLog
                 try
                 {
                     StackTrace st = new StackTrace(3, false);
-                    StackFrame frame = st.GetFrame(0);
+                    StackFrame frame = st.GetFrame(1);
                     MethodBase method = frame.GetMethod();
                     if (method.ReflectedType != null)
                     {
@@ -399,6 +401,5 @@ namespace QLog
             }
             return new Tuple<string, string>(className, methodName);
         }
-
     }
 }

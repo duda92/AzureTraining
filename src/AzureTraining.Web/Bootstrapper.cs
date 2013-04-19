@@ -22,7 +22,7 @@ namespace AzureTraining.Web
             var container = new UnityContainer();
 
             container.RegisterType<IDocumentRepository, DocumentRepository>();
-            container.RegisterType<ILogger, Logger>();            
+            container.RegisterType<IAzureLogger, AzureLogger>();            
 
             return container;
         }

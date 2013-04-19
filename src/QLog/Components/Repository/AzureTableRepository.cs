@@ -12,7 +12,7 @@ using QLog.Models;
 
 namespace QLog.Components.Repository
 {
-    internal class AzureTableRepository : IRepository
+    internal partial class AzureTableRepository : IRepository
     {
         private const string DEFAULT_TABLE_NAME = "qlog{0}";
         private const string POSTFIX_TABLE_NAME = "qlog{0}{1}";
@@ -48,7 +48,8 @@ namespace QLog.Components.Repository
         {
             CloudStorageAccount storageAccount = GetStorageAccount(); 
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-            string tableName = GetTableName(log);
+            //string tableName = GetTableName(log);
+            string tableName = GetTableName();
             CloudTable table = tableClient.GetTableReference(tableName);
             table.CreateIfNotExists();
             log.PartitionKey = log.CreatedOn.ToString("HH");
