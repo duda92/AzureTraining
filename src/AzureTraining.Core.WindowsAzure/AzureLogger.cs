@@ -64,8 +64,6 @@ namespace AzureTraining.Core.WindowsAzure
                 return logs;
             }
         }
-
-        
     }
 
 

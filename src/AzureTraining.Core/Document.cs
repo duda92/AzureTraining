@@ -13,6 +13,8 @@ namespace AzureTraining.Core
 
         public string DocumentId { get; set; }
 
+        public int PagesCount { get; set; } 
+
         public string Name { get; set; }
 
         public string Url { get; set; }

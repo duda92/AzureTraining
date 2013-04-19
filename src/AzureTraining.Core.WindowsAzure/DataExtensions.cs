@@ -29,7 +29,8 @@ namespace AzureTraining.Core.WindowsAzure
                 Name = row.Name,
                 Url = row.Url,
                 IsShared = row.IsShared,
-                Preview = row.Preview
+                Preview = row.Preview,
+                PagesCount = row.PagesCount
             };
         }
 

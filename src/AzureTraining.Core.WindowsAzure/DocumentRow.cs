@@ -19,6 +19,8 @@
 
         public string Preview { get; set; }
 
+        public int PagesCount { get; set; }
+
         public DocumentRow() : base()
         {
         }
@@ -33,6 +35,7 @@
             this.IsShared = document.IsShared;
             this.PartitionKey = document.DocumentId;
             this.Preview = document.Preview;
+            this.PagesCount = document.PagesCount;
         }
 
         private DocumentRow(string partitionKey, string rowKey)

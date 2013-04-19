@@ -1,7 +1,20 @@
 ﻿@model AzureTraining.Web.Models.DocumentViewViewModel
 
-View document
+@Model.Document.Name
 
-@Model.Document.DocumentId
-
-@Model.Document.Url
+<ul class="thumbnails">
+    @for (var page = 1; page < Model.Document.PagesCount; page++)
+    {
+    <li class="span4">
+        <div class="thumbnail">
+            <div class="caption">
+                <h3>@page</h3>
+                <p>Here could be page preview</p>
+                <p>
+                    <a href="#" class="btn btn-primary">View</a> 
+                </p>
+            </div>
+        </div>
+    </li>
+    }
+</ul>

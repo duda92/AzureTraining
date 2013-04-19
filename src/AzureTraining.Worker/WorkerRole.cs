@@ -123,10 +123,9 @@ namespace AzureTraining.Worker
                     
                     SetDocumentPreview(document, blob);
                     
-                    PaginateDocument(blob);
+                    PaginateDocument(document, blob);
                     
-                    var blobUri = blob.Uri.ToString();
-                    document.Url = blobUri;
+                    SetUri(blob, document);
                     
                     repository.Update(document);
 
@@ -145,12 +144,23 @@ namespace AzureTraining.Worker
             Trace.TraceError("Processing document error, cannot find {0}", documentId);
             return false;
         }
-
+  
         #region DocumentProcessing
 
-        private void PaginateDocument(CloudBlob blob)
+        private void SetUri(CloudBlob blob, Document document)
         {
-           
+            var blobUri = blob.Uri.ToString();
+            document.Url = blobUri;
+        }
+
+        private void PaginateDocument(Document doc, CloudBlob blob)
+        {
+            var content = blob.DownloadText();
+            var paginator = new PaginationService();
+            int pagesCount;
+            string processed = paginator.Paginate(content, out pagesCount);
+            doc.PagesCount = pagesCount;
+            blob.UploadText(processed);
         }
   
         private void TransleteDocument(CloudBlob blob)

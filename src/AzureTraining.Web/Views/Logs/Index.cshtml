@@ -42,18 +42,21 @@
     </tbody>
 </table>
 
-<div>
-
-    @for (var _page = 1; _page <= Model.PageCount; _page++)
-    {
-        if (_page != @Model.PageNumber)
+<div class="pagination">
+    <ul>
+        @for (var _page = 1; _page <= Model.PageCount; _page++)
         {
-            @Html.ActionLink(_page.ToString(), MVC.Logs.ActionNames.Index, new { page = _page, documentName = documentName, orderByDate = orderByDate })
+            <li>
+                @if (_page != @Model.PageNumber)
+                {
+                    Html.ActionLink(_page.ToString(), MVC.Logs.ActionNames.Index, new { page = _page, documentName = documentName, orderByDate = orderByDate })
+                }
+                else
+                {
+                    Html.Raw(_page);
+                }
+            @Html.Raw(" ");
+            </li>
         }
-        else
-        {
-            @Html.Raw(_page);
-        }
-        @Html.Raw(" ");
-    }
+    </ul>
 </div>
