@@ -11,20 +11,28 @@ namespace AzureTraining.Core
 
         public string GetDocumentPage(string documentContent, int page)
         {
+            if (!Paginated(documentContent))
+                return string.Empty;
+
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(documentContent);
             var node = doc.SelectSingleNode(string.Format("//Page[@number='{0}']", page));
+            
+            if (node == null)
+                return string.Empty;
             return node.InnerText;
         }
         
         public string Paginate(string input, out int pagesCount)
         {
+            XmlDocument doc = new XmlDocument();
             if (Paginated(input))
             {
-                pagesCount = 0;
+                doc.LoadXml(input);
+                var pageNodes = doc.SelectNodes("//Page");
+                pagesCount = pageNodes.Count;
                 return input;
             }
-            XmlDocument doc = new XmlDocument();
             XmlElement root = (XmlElement)doc.AppendChild(doc.CreateElement("Document"));
 
             var pagesContent = SeparateContent(input);
@@ -61,8 +69,17 @@ namespace AzureTraining.Core
   
         private bool Paginated(string input)
         {
-            //todo: check tags - if doc contains pagination xml tags return true
-            return false;
+            XmlDocument doc = new XmlDocument();
+            try
+            {
+                doc.LoadXml(input);
+            }
+            catch (XmlException)
+            {
+                return false;
+            }
+            //Condition is document divided to pages nodes
+            return doc.ChildNodes.Count == doc.SelectNodes("//Page").Count;
         }
     }
 }
