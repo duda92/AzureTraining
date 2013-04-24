@@ -27,7 +27,7 @@
     <div class="control-group" data-bind="visible: fileSelected">
         <label class="control-label" for="Name">Name<span class="required">*</span></label>
         <div class="controls">
-            <input data-val="true" data-val-length="Name of uploading file must be longer than 2 character" data-val-length-min="2" data-val-required="Set the name of file" id="Name" name="Name" type="text" value="">
+            <input data-val="true" data-val-length="Name of uploading file must be longer than 2 character" data-val-length-min="2" data-val-required="Set the name of file" id="Name" name="Name" type="text" data-bind="value: fileName">
             <span class="help-inline">
                 <span class="field-validation-valid" data-valmsg-for="Name" data-valmsg-replace="true"></span>
             </span>

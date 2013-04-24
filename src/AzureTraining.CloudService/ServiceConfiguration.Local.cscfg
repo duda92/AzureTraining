@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ServiceConfiguration serviceName="AzureTraining.CloudService" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="3" osVersion="*" schemaVersion="2012-10.1.8">
   <Role name="AzureTraining.Web">
-    <Instances count="1" />
+    <Instances count="2" />
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
       <Setting name="DataConnectionString" value="UseDevelopmentStorage=true" />
-      <Setting name="DefaultConnection" value="Server=tcp:t59mmz5sqw.database.windows.net,1433;Database=AzureTrainingDev;User ID=bdudnik@t59mmz5sqw;Password=Dudadudl1###;Trusted_Connection=False;Encrypt=True;Connection Timeout=30;" />
+      <Setting name="DefaultConnection" value="Data Source=tcp:t59mmz5sqw.database.windows.net,1433;Initial Catalog=AzureTrainingDev;User ID=bdudnik@t59mmz5sqw;Password=Dudadudl1###" />
       <Setting name="QLogDataSource" value="UseDevelopmentStorage=true" />
     </ConfigurationSettings>
   </Role>
   <Role name="AzureTraining.Worker">
-    <Instances count="1" />
+    <Instances count="2" />
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
       <Setting name="Microsoft.ServiceBus.ConnectionString" value="Endpoint=sb://azuretrainingservicebus.servicebus.windows.net/;SharedSecretIssuer=owner;SharedSecretValue=QL8ab5A+dq0L5+REyBkH5G2Ffz/5lVXa+yuUqAhDcd8=" />

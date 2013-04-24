@@ -27,7 +27,7 @@ namespace AzureTraining.Web.Binders
                 }
                 catch (HttpRequestValidationException)
                 {
-                    bindingContext.ModelState.AddModelError("Content", "File content doesn't looks like a text file");
+                    bindingContext.ModelState.AddModelError("Content", "File content doesn't looks like a simple text file");
                 }
                 return;
             }

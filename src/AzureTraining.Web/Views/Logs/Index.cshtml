@@ -49,13 +49,13 @@
             <li>
                 @if (_page != @Model.PageNumber)
                 {
-                    Html.ActionLink(_page.ToString(), MVC.Logs.ActionNames.Index, new { page = _page, documentName = documentName, orderByDate = orderByDate })
+                    @Html.ActionLink(_page.ToString(), MVC.Logs.ActionNames.Index, new { page = _page, documentName = documentName, orderByDate = orderByDate })
                 }
                 else
                 {
-                    Html.Raw(_page);
+                    @Html.Raw(_page)
                 }
-            @Html.Raw(" ");
+            @Html.Raw(" ")
             </li>
         }
     </ul>

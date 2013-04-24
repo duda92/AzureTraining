@@ -78,8 +78,7 @@ namespace AzureTraining.Core
             {
                 return false;
             }
-            //Condition is document divided to pages nodes
-            return doc.ChildNodes.Count == doc.SelectNodes("//Page").Count;
+            return doc.SelectNodes("//Page").Count != 0;
         }
     }
 }

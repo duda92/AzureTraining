@@ -1,0 +1,719 @@
+using System.Collections.Specialized;
+using VacationRoost.Domain;
+using VacationRoost.Domain.Complexes;
+using VacationRoost.Domain.Packages;
+using VacationRoost.Utilities;
+
+namespace VacationRoost.Services
+{
+    public class PackageLodgingSearchCriteriaFactory : IPackageLodgingSearchCriteriaFactory
+    {
+        public const string FloorPlanTypeOrderBySqlLogic = @"CASE FloorPlanType
+        WHEN 'HotelRoom' THEN 0
+        WHEN 'Suite' THEN 1
+        WHEN 'Penthouse' THEN 2
+        WHEN 'Studio' THEN 3
+        WHEN 'Condo' THEN 4
+        WHEN 'Home' THEN 5 END,
+        RentalUnitOrder,
+        UnitNumber";
+        public const string BedroomsOrderBySqlLogic = @"CASE WHEN Bedrooms LIKE '%BR' THEN (SELECT LEFT(Bedrooms, LEN(Bedrooms)-2)) ELSE 0 END {0},";
+
+        public PackageLodgingSearchCriteria Create(NameValueCollection queryString)
+        {
+            var beginDate = queryString["beginDate"];
+            var endDate = queryString["endDate"];
+            var adults = queryString["adults"];
+            var children = queryString["children"];
+            var bedrooms = queryString["bedrooms"];
+
+            if (!string.IsNullOrWhiteSpace(bedrooms))
+            {
+                bedrooms = bedrooms.ToLowerInvariant().Contains("any") ? null : bedrooms;
+            }
+            var buildingType = queryString["buildingType"];
+            if (!string.IsNullOrWhiteSpace(buildingType))
+            {
+                buildingType = buildingType.ToLowerInvariant().Contains("any") ? null : buildingType;
+            }
+
+            var orderBy = queryString["orderBy"];
+            if (!string.IsNullOrWhiteSpace(orderBy))
+            {
+                const string staticSortFilter = "Order by {0}";
+
+                string sortColumn;
+                string sortDirection;
+
+                sortDirection = orderBy.Contains("low") || orderBy.Contains("default") ? "asc" : "desc";
+
+                sortColumn = orderBy.Contains("price") || orderBy.Contains("default") ? "NightlyRate " + sortDirection : null;
+
+                if (string.IsNullOrWhiteSpace(sortColumn))
+                {
+                    sortColumn = orderBy.Contains("beds")
+                                        ? string.Format(BedroomsOrderBySqlLogic, sortDirection) +
+                                        FloorPlanTypeOrderBySqlLogic
+                                        : null;
+                }
+
+                if (!string.IsNullOrWhiteSpace(sortColumn) && !string.IsNullOrWhiteSpace(sortDirection))
+                {
+                    orderBy = string.Format(staticSortFilter, sortColumn);
+                }
+                else
+                {
+                    orderBy = string.Format(staticSortFilter, "MerchandisingOrder, RandomDisplay");
+                }
+            }
+
+            var queryStringPage = queryString["page"];
+            int page = 1;
+            if (!string.IsNullOrWhiteSpace(queryStringPage))
+            {
+                if(!int.TryParse(queryStringPage, out page))
+                {
+                    page = 1;
+                }
+            }
+
+            var adultsValue = adults.ToIntNullWhenEmptyOrZero();
+            var childrenValue = children.ToIntNullWhenEmptyOrZero();
+            var occupancy = 0;
+            if (adultsValue.HasValue)
+                occupancy += adultsValue.Value;
+            if (childrenValue.HasValue)
+                occupancy += childrenValue.Value;
+
+            return new PackageLodgingSearchCriteria
+            {
+                TravelDates = TravelDates.Parse(beginDate, endDate),
+                Adults = adultsValue,
+                Children = childrenValue,
+                Bedrooms = BedroomType.LookupByDescription(bedrooms),
+                BuildingType = BuildingType.Lookup(buildingType),
+                OrderBy = orderBy,
+                ResultsPerPage = 25,
+                CurrentPageNumber = page,
+                Occupancy = occupancy
+            };
+        }
+    }
+}
+
+------------------------------------------
+			
+			public class PackageLodgingSearchCriteria : PaginationCriteria
+    {
+        public int? Children { get; set; }
+        public int? Adults { get; set; }
+        public TravelDates TravelDates { get; set; }
+        public long PackageDefinitionId { get; set; }
+        public long BusinessUnitId { get; set; }
+        public BedroomType Bedrooms { get; set; }
+        public BuildingType BuildingType { get; set; }
+        public string OrderBy { get; set; }
+        public int Occupancy { get; set; }
+
+        public bool IsEmpty
+        {
+            get { return TravelDates == null || PackageDefinitionId < 1; }
+        }
+
+        
+    }
+	
+	-----------------------------------------------
+	<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="RentalUnitContent" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ibatis.apache.org/mapping">
+  <alias>
+    <typeAlias alias="RentalUnitContent" type="VacationRoost.Domain.RentalUnitContents.RentalUnitContent, VacationRoost.Core"/>
+    <typeAlias alias="RentalUnitContentSearchCriteria" type="VacationRoost.Domain.RentalUnitContents.RentalUnitContentSearchCriteria, VacationRoost.Core"/>
+    <typeAlias alias="RateCalendarSearchCriteria" type="VacationRoost.Domain.RentalUnitContents.RateCalendarSearchCriteria, VacationRoost.Core"/>
+    <typeAlias alias="MerchandisingGroupSearchCriteria" type="VacationRoost.Domain.RentalUnitContents.MerchandisingGroupSearchCriteria, VacationRoost.Core"/>
+    <typeAlias alias="BedroomType" type="VacationRoost.Domain.Complexes.BedroomType" />
+
+    <typeAlias alias="PersistedRentalUnitContentRoomType" type="VacationRoost.Persistence.RentalUnitContents.PersistedRentalUnitContentRoomType, VacationRoost.Core" />
+    <typeAlias alias="PersistedRoomTypeView" type="VacationRoost.Persistence.RentalUnitContents.PersistedRoomTypeView, VacationRoost.Core" />
+    <typeAlias alias="PersistedRoomTypeSplurgeAmenity" type="VacationRoost.Persistence.RentalUnitContents.PersistedRoomTypeSplurgeAmenity, VacationRoost.Core" />
+    <typeAlias alias="PersistedRoomTypeBonusRoom" type="VacationRoost.Persistence.RentalUnitContents.PersistedRoomTypeBonusRoom, VacationRoost.Core" />
+  </alias>
+
+  <resultMaps>
+    <resultMap id="RentalUnitContentRM" class="RentalUnitContent">
+      <result property="Id" column="RentalUnitId"/>
+      <result property="InventoryMode" column="InventoryMode" typeHandler="VacationRoost.Persistence.Callbacks.InventoryModeTypeHandlerCallback, VacationRoost.Core"/>
+      <result property="InventoryId" column="InventoryId"/>
+      <result property="ComplexName" column="ComplexName"/>
+      <result property="ComplexDescription" column="ComplexDescription"/>
+      <result property="UnitDescription" column="UnitDescription"/>
+      <result property="Proximity" column="Proximity"/>
+      <result property="GeoLocation" resultMapping="RentalUnitContent.GeoLocationRM"/>
+      <result property="Address" resultMapping="RentalUnitContent.AddressRM" />
+      <result property="UnitNumber" column ="UnitNumber"/>
+      <result property="BuildingName" column ="BuildingName"/>
+      <result property="BuildingDescription" column ="BuildingDescription"/>
+      <result property="Type" typeHandler="VacationRoost.Persistence.Callbacks.RentalUnitTypeHandlerCallback, VacationRoost.Core" column ="RentalUnitType"/>
+      <result property="BuildingType" typeHandler="VacationRoost.Persistence.Callbacks.BuildingTypeHandlerCallback, VacationRoost.Core" column="BuildingType"/>
+      
+      <!--<result property="City" resultMapping="Geography.CityRM" />-->
+      <result property="City" column="CityId" select="SelectCityById" />
+      
+      <result property="NeighborhoodId" column ="NeighborhoodId"/>
+      <result property="ResortGroupId" column ="ResortGroupId"/>
+      <result property="DisplayPhotoDisclaimer" column ="DisplayPhotoDisclaimer"/>
+      <result property="MerchandisingOrder" column ="MerchandisingOrder"/>
+      <result property="IsLuxury" column ="IsLuxury"/>
+      <result property="IsFeaturedProperty" column ="IsFeaturedProperty"/>
+      <result property="GatewayPropertyId" column ="GatewayPropertyId"/>
+      <result property="IsAvailableForBooking" column ="IsAvailableForBooking"/>
+      <result property="Occupancy" column ="Occupancy"/>
+      <result property="StayRestrictionCalendarId" column="StayRestrictionCalendarId" />
+      <result property="UnitDisclaimer" column ="Disclaimer"/>
+      <result property="Bedding" column="Bedding" />
+      <result property="IsBathroomPrivate" column="IsBathroomPrivate" />
+      <result property="FullBathrooms" column="FullBathrooms" />
+      <result property="ThreeQuarterBathrooms" column="ThreeQuarterBathrooms" />
+      <result property="HalfBathrooms" column="HalfBathrooms" />
+      <result property="IsActive" column="IsActive" />
+      <result property="ImageCount" column="ImageCount" />
+
+      <result property="CurrencyCode" column="CurrencyCode"  typeHandler="VacationRoost.Persistence.Callbacks.CurrencyTypeHandlerCallback, VacationRoost.Core" />
+      
+      <!--<result property="Supplier" resultMapping="Supplier.SupplierRM" />-->
+      <result property="Supplier" column="SupplierId" select="SelectSupplierById" />
+    
+    </resultMap>
+
+
+    <resultMap id="RentalUnitContentRoomTypeRM" class="PersistedRentalUnitContentRoomType">
+      <result property="RentalUnitId" column="RentalUnitId"/>
+      <result property="RoomName" column="RoomName"/>
+      <result property="FloorPlan" resultMapping="RentalUnitContent.RoomTypeFloorPlanRM"/>
+      <result property="RoomClassPrefix" column="RoomClassPrefix"/>
+      <result property="RoomClassSuffix" column="RoomClassSuffix"/>
+      <result property="SplurgeView" column="SplurgeView"/>
+    </resultMap>
+
+    <resultMap id="RoomTypeFloorPlanRM" class="PersistedStandAloneFloorPlan">
+      <constructor>
+        <argument argumentName="floorPlanType" typeHandler="VacationRoost.Persistence.Callbacks.FloorPlanTypeHandlerCallback, VacationRoost.Core" column="FloorPlanType"/>
+        <argument argumentName="bedrooms" typeHandler="VacationRoost.Persistence.Callbacks.BedroomTypeHandlerCallback, VacationRoost.Core" column="Bedrooms"/>
+      </constructor>
+      <result property="PersistedFloorPlanType_Ignored" column="FloorPlanType"/>
+    </resultMap>
+
+    <resultMap id="RentalUnitContentRoomTypeViewRM" class="PersistedRoomTypeView">
+      <result property="RentalUnitId" column="RentalUnitId"/>
+      <result property="View" column="View"/>
+    </resultMap>
+
+    <resultMap id="RentalUnitContentRoomTypeSplurgeAmenityRM" class="PersistedRoomTypeSplurgeAmenity">
+      <result property="RentalUnitId" column="RentalUnitId"/>
+      <result property="SplurgeAmenity" column="SplurgeAmenity"/>
+    </resultMap>
+
+    <resultMap id="RentalUnitContentRoomTypeBonusRoomRM" class="PersistedRoomTypeBonusRoom">
+      <result property="RentalUnitId" column="RentalUnitId"/>
+      <result property="BonusRoom" column="BonusRoom"/>
+    </resultMap>
+
+    <resultMap id="FullRentalUnitContentRM" class="RentalUnitContent" extends="RentalUnitContentRM">
+      <discriminator column="RentalUnitType" type="string"/>
+      <subMap value="STANDALONE" resultMapping="StandAloneRentalUnitRM" />
+      <subMap value="COMPLEX" resultMapping="ComplexRentalUnitRM" />
+    </resultMap>
+    <resultMap id="StandAloneRentalUnitRM" class="RentalUnitContent" extends="RentalUnitContentRM">
+      <result property="RoomType" column="RentalUnitId" select="SelectRoomTypePropertiesFromStandAloneRentalUnit" />
+    </resultMap>
+    <resultMap id="ComplexRentalUnitRM" class="RentalUnitContent" extends="RentalUnitContentRM">
+      <result property="RoomType" column="RentalUnitId" select="SelectComplexRoomTypeProperties" />
+    </resultMap>
+    
+    <resultMap id="StandAloneRoomTypeRM" class="PersistedRoomType">
+      <result property="RoomName" column="RoomName"/>
+      <result property="FloorPlan" resultMapping="RentalUnit.FloorPlanRM"/>
+      <result property="RoomClassPrefix" column="RoomClassPrefix"/>
+      <result property="RoomClassSuffix" column="RoomClassSuffix"/>
+      <result property="SplurgeView" column="SplurgeView"/>
+      <result property="PersistedViews" column="RentalUnitId" select="SelectStandAloneRentalUnitRoomTypeViewsByRentalUnitId"/>
+      <result property="PersistedSplurgeAmenities" column="RentalUnitId" select="SelectStandAloneRentalUnitRoomTypeSplurgeAmenitiesByRentalUnitId"/>
+    </resultMap>
+
+    <resultMap id="ComplexRoomTypeRM" class="PersistedComplexRoomType">
+      <result property="Id" column="ComplexRoomTypeId"/>
+      <result property="ComplexId" column="ComplexId"/>
+      <result property="ComplexBuildingId" column="ComplexBuildingId"/>
+      <result property="FloorPlan" resultMapping="RoomType.FloorPlanRM"/>
+      <result property="RoomName" column="RoomName"/>
+      <result property="RoomClassPrefix" column="RoomClassPrefix"/>
+      <result property="RoomClassSuffix" column="RoomClassSuffix"/>
+      <result property="SplurgeView" column="SplurgeView"/>
+      <result property="PersistedViews" column="ComplexRoomTypeId" select="SelectRoomTypeViewsByRoomTypeId"/>
+      <result property="PersistedSplurgeAmenities" column="ComplexRoomTypeId" select="SelectRoomTypeSplurgeAmenitiesByRoomTypeId"/>
+    </resultMap>
+
+
+    <resultMap id="GeoLocationRM" class="GeoLocation">
+      <constructor>
+        <argument argumentName="latitude" column="Latitude"/>
+        <argument argumentName="longitude" column="Longitude"/>
+      </constructor>
+    </resultMap>
+
+    <resultMap id="AddressRM" class="PartialAddress">
+      <constructor>
+        <argument argumentName="address1" column="Address1"/>
+        <argument argumentName="address2" column="Address2"/>
+        <argument argumentName="city" column="City"/>
+        <argument argumentName="stateCode" column="StateCode"/>
+        <argument argumentName="postalCode" column="PostalCode"/>
+        <argument argumentName="countryCode" column="CountryCode"/>
+      </constructor>
+    </resultMap>    
+              
+  </resultMaps>
+  <statements>
+    <select id="SelectRentalUnitContentStandAloneRoomTypesByRentalUnitIds" resultMap="RentalUnitContentRoomTypeRM" parameterClass="list">
+      SELECT * FROM StandAloneRentalUnits WHERE RentalUnitId IN
+      <iterate open="(" close=")" conjunction=",">
+        #[]#
+      </iterate>
+      ORDER BY RentalUnitId
+    </select>
+    <select id="SelectRentalUnitContentStandAloneRoomTypeViewsByRentalUnitIds" resultMap="RentalUnitContentRoomTypeViewRM" parameterClass="list">
+      SELECT RentalUnitId, [View] FROM StandAloneRentalUnitRoomTypeViews s
+      WHERE RentalUnitId IN
+      <iterate open="(" close=")" conjunction=",">
+        #[]#
+      </iterate>
+      ORDER BY RentalUnitId
+    </select>
+    <select id="SelectRentalUnitContentStandAloneRoomTypeSplurgeAmenitiesByRentalUnitIds" resultMap="RentalUnitContentRoomTypeSplurgeAmenityRM" parameterClass="list">
+      SELECT RentalUnitId, SplurgeAmenity FROM StandAloneRentalUnitRoomTypeSplurgeAmenities s
+      WHERE RentalUnitId IN
+      <iterate open="(" close=")" conjunction=",">
+        #[]#
+      </iterate>
+      ORDER BY RentalUnitId
+    </select>
+    <select id="SelectRentalUnitContentStandAloneRoomTypeBonusRoomsByRentalUnitIds" resultMap="RentalUnitContentRoomTypeBonusRoomRM" parameterClass="list">
+      SELECT RentalUnitId, BonusRoom FROM StandAloneRentalUnitRoomTypeBonusRooms s
+      WHERE RentalUnitId IN
+      <iterate open="(" close=")" conjunction=",">
+        #[]#
+      </iterate>
+      ORDER BY RentalUnitId
+    </select>
+    
+    <select id="SelectRentalUnitContentComplexRoomTypesByRentalUnitIds" resultMap="RentalUnitContentRoomTypeRM" parameterClass="list">
+      SELECT RentalUnitId, rt.*
+      FROM ComplexRoomTypes rt
+      JOIN ComplexRoomTypeRentalUnits rtru on rtru.ComplexRoomTypeId = rt.ComplexRoomTypeId
+      WHERE RentalUnitId IN
+      <iterate open="(" close=")" conjunction=",">
+        #[]#
+      </iterate>
+      ORDER BY RentalUnitId
+    </select>
+    <select id="SelectRentalUnitContentComplexRoomTypeViewsByRentalUnitIds" resultMap="RentalUnitContentRoomTypeViewRM" parameterClass="list">
+      SELECT RentalUnitId, v.[View]
+      FROM ComplexRoomTypeViews v
+      JOIN ComplexRoomTypes rt on rt.ComplexRoomTypeId = v.ComplexRoomTypeId
+      JOIN ComplexRoomTypeRentalUnits rtru on rtru.ComplexRoomTypeId = rt.ComplexRoomTypeId
+      WHERE RentalUnitId IN
+      <iterate open="(" close=")" conjunction=",">
+        #[]#
+      </iterate>
+      ORDER BY RentalUnitId
+    </select>
+    <select id="SelectRentalUnitContentComplexRoomTypeSplurgeAmenitiesByRentalUnitIds" resultMap="RentalUnitContentRoomTypeSplurgeAmenityRM" parameterClass="list">
+      SELECT RentalUnitId, a.SplurgeAmenity
+      FROM ComplexRoomTypeSplurgeAmenities a
+      JOIN ComplexRoomTypes rt on rt.ComplexRoomTypeId = a.ComplexRoomTypeId
+      JOIN ComplexRoomTypeRentalUnits rtru on rtru.ComplexRoomTypeId = rt.ComplexRoomTypeId
+      WHERE RentalUnitId IN
+      <iterate open="(" close=")" conjunction=",">
+        #[]#
+      </iterate>
+      ORDER BY RentalUnitId
+    </select>
+    <select id="SelectRentalUnitContentComplexRoomTypeBonusRoomsByRentalUnitIds" resultMap="RentalUnitContentRoomTypeBonusRoomRM" parameterClass="list">
+      SELECT RentalUnitId, BonusRoom
+      FROM ComplexRoomTypeBonusRooms a
+      JOIN ComplexRoomTypes rt on rt.ComplexRoomTypeId = a.ComplexRoomTypeId
+      JOIN ComplexRoomTypeRentalUnits rtru on rtru.ComplexRoomTypeId = rt.ComplexRoomTypeId
+      WHERE RentalUnitId IN
+      <iterate open="(" close=")" conjunction=",">
+        #[]#
+      </iterate>
+      ORDER BY RentalUnitId
+    </select>
+
+    <select id="SelectRoomTypePropertiesFromStandAloneRentalUnit" resultMap="StandAloneRoomTypeRM" parameterClass="long">
+      select *
+      from StandAloneRentalUnits ru (NOLOCK)
+      Where ru.RentalUnitId = #value#
+    </select>
+
+    <select id="SelectComplexRoomTypeProperties" resultMap="ComplexRoomTypeRM" parameterClass="long">
+      select * from ComplexRoomTypes rt (NOLOCK)
+      JOIN ComplexRoomTypeRentalUnits rtru on rtru.ComplexRoomTypeId = rt.ComplexRoomTypeId
+      where rtru.RentalUnitId = #value#
+    </select>
+
+    <sql id="RentalUnitContentFrom">
+      FROM RentalUnitContentView
+      INNER JOIN Suppliers ON RentalUnitContentView.SupplierId = Suppliers.SupplierId
+      LEFT JOIN Cities ON RentalUnitContentView.CityId = Cities.CityId
+      LEFT JOIN Countries ON Cities.CountryCode = Countries.CountryCode
+      LEFT JOIN States ON Cities.ISOStateCode = States.ISOStateCode
+      LEFT JOIN Islands ON Islands.IslandId = Cities.IslandId
+    </sql>
+
+    <select id="SelectRentalUnitContentByRentalUnitId" resultMap="FullRentalUnitContentRM" parameterClass="long">
+      SELECT * 
+      <include refid="RentalUnitContentFrom" />
+      WHERE RentalUnitId = #value#
+    </select>
+
+    <select id="SelectBedroomTypesByPackageDefinitionId" parameterClass="long">
+      SELECT RentalUnitContentView.Bedrooms
+      FROM PackageDefinitionRentalUnits as pd(NOLOCK)
+      LEFT JOIN RentalUnitContentView (NOLOCK) ON pd.RentalUnitId = RentalUnitContentView.RentalUnitId
+      WHERE pd.PackageDefinitionId = #value#
+    </select>
+
+    <select id="SelectRentalUnitContentsByPackageDefinitionId" resultMap="RentalUnitContentRM" parameterClass="long">
+      SELECT *
+      <include refid="RentalUnitContentFrom" />
+      WHERE RentalUnitContentView.RentalUnitId IN (SELECT RentalUnitId FROM PackageDefinitionRentalUnits WHERE PackageDefinitionId = #value#)
+      <include refid="SearchResultOrderBy" />
+    </select>
+
+    <sql id="SearchResultOrderBy">
+      ORDER BY RentalUnitContentView.SupplierName,
+      RentalUnitContentView.ComplexName,
+      RentalUnitContentView.BuildingName,
+      CASE WHEN RentalUnitContentView.Bedrooms LIKE '%BR' THEN (SELECT LEFT(RentalUnitContentView.Bedrooms, LEN(RentalUnitContentView.Bedrooms)-2)) ELSE 0 END,
+      CASE RentalUnitContentView.FloorPlanType
+      WHEN 'HotelRoom' THEN 0
+      WHEN 'Suite' THEN 1
+      WHEN 'Penthouse' THEN 2
+      WHEN 'Studio' THEN 3
+      WHEN 'Condo' THEN 4
+      WHEN 'Home' THEN 5 END,
+      RentalUnitContentView.RentalUnitOrder,
+      RentalUnitContentView.UnitNumber
+    </sql>
+
+    <select id="SelectRentalUnitContentsBySearchCriteria" resultMap="RentalUnitContentRM" parameterClass="RentalUnitContentSearchCriteria">
+      SELECT *
+      <include refid="RentalUnitContentFrom" />
+      INNER JOIN RentalUnits ru on ru.RentalUnitId = RentalUnitContentView.RentalUnitId
+      <dynamic prepend="WHERE">
+        <isNotEmpty property="ComplexName" prepend="AND">
+          RentalUnitContentView.ComplexName LIKE '%' + #ComplexName# + '%'
+        </isNotEmpty>
+        <isNotEmpty property="BuildingName" prepend="AND">
+          RentalUnitContentView.BuildingName LIKE '%' + #BuildingName# + '%'
+        </isNotEmpty>
+        <isNotNull property="FloorPlanType" prepend="AND">
+          RentalUnitContentView.FloorPlanType = #FloorPlanType.Code#
+        </isNotNull>
+        <isNotNull property="BedroomType" prepend="AND">
+          RentalUnitContentView.Bedrooms = #BedroomType.Code#
+        </isNotNull>
+        <isNotNull property="IsActive" prepend="AND">
+          RentalUnitContentView.IsActive = #IsActive#
+        </isNotNull>
+        <isNotNull property="SupplierId" prepend="AND">
+          RentalUnitContentView.SupplierId = #SupplierId#
+        </isNotNull>
+        <isNotNull property="IsSupplierActive" prepend="AND">
+          RentalUnitContentView.IsSupplierActive = #IsSupplierActive#
+        </isNotNull>
+        <isNotNull property="CurrencyCode" prepend="AND">
+          RentalUnitContentView.CurrencyCode = #CurrencyCode.Code#
+        </isNotNull>
+        <isNotNull property="MerchandisingOrder" prepend="AND">
+          RentalUnitContentView.MerchandisingOrder = #MerchandisingOrder#
+        </isNotNull>
+        <isNotNull property="IsLuxury" prepend="AND">
+          RentalUnitContentView.IsLuxury = #IsLuxury#
+        </isNotNull>
+        <isNotNull property="IsFeaturedProperty" prepend="AND">
+          RentalUnitContentView.IsFeaturedProperty = #IsFeaturedProperty#
+        </isNotNull>
+        <isNotEmpty property="GatewayPropertyId" prepend="AND">
+          RentalUnitContentView.GatewayPropertyId = #GatewayPropertyId#
+        </isNotEmpty>
+        <isNotNull property="IsAvailableForBooking" prepend="AND">
+          RentalUnitContentView.IsAvailableForBooking = #IsAvailableForBooking#
+        </isNotNull>
+        <isNotNull property="Occupancy" prepend="AND">
+          RentalUnitContentView.Occupancy = #Occupancy#
+        </isNotNull>
+        <isNotNull property="DestinationTier" prepend="AND">
+          RentalUnitContentView.DestinationId IN (SELECT DestinationId FROM Destinations WHERE Tier=#DestinationTier#)
+        </isNotNull>
+        <isNotNull property="DestinationId" prepend="AND">
+          RentalUnitContentView.DestinationId = #DestinationId#
+        </isNotNull>
+        <isNotNull property="SupplierTier" prepend="AND">
+          RentalUnitContentView.SupplierTier = #SupplierTier#
+        </isNotNull>
+        <isNotNull property="HasRateCalendar">
+          <isEqual compareValue="True" property="HasRateCalendar" prepend="AND">
+            ru.RateCalendarId IS NOT NULL
+          </isEqual>
+        </isNotNull>
+      </dynamic>
+      <isNotEmpty property="OrderByString">
+        ORDER BY $OrderByString$
+      </isNotEmpty>
+      <isEmpty property="OrderByString">
+        ORDER BY
+        <isEqual compareValue="True" property="UseSupplierNameInDefaultFilter" >
+          RentalUnitContentView.SupplierName,
+        </isEqual>
+        RentalUnitContentView.ComplexName,
+        RentalUnitContentView.BuildingName,
+        CASE WHEN RentalUnitContentView.Bedrooms LIKE '%BR' THEN (SELECT LEFT(RentalUnitContentView.Bedrooms, LEN(RentalUnitContentView.Bedrooms)-2)) ELSE 0 END,
+        CASE RentalUnitContentView.FloorPlanType
+        WHEN 'HotelRoom' THEN 0
+        WHEN 'Suite' THEN 1
+        WHEN 'Penthouse' THEN 2
+        WHEN 'Studio' THEN 3
+        WHEN 'Condo' THEN 4
+        WHEN 'Home' THEN 5 END,
+        RentalUnitContentView.RentalUnitOrder,
+        RentalUnitContentView.UnitNumber
+      </isEmpty>
+    </select>
+
+    <select id="SelectRentalUnitContentByFeeCalendarId" parameterClass="long" resultMap="RentalUnitContentRM">
+      SELECT *
+      <include refid="RentalUnitContentFrom" />
+      INNER JOIN RentalUnitFeeCalendars rufc on rufc.RentalUnitId = RentalUnitContentView.RentalUnitId
+      INNER JOIN FeeCalendars fc ON rufc.FeeCalendarId = fc.FeeCalendarId
+      WHERE fc.FeeCalendarTemplateId = #value#
+    </select>
+
+    <select id="SelectRentalUnitContentByInventoryIds" parameterClass="list" resultMap="RentalUnitContentRM">
+      SELECT *
+      <include refid="RentalUnitContentFrom" />
+      WHERE RentalUnitContentView.InventoryId IN
+      <iterate open="(" close=")" conjunction=",">
+        #[]#
+      </iterate>
+    </select>
+
+    <select id="SelectRentalUnitContentByInventoryId" parameterClass="long" resultMap="FullRentalUnitContentRM">
+      SELECT *
+      <include refid="RentalUnitContentFrom" />
+      WHERE RentalUnitContentView.InventoryId = #value#
+    </select>
+
+    <select id="SelectRentalUnitContentsByRentalUnitIds" parameterClass="list" resultMap="RentalUnitContentRM">
+      SELECT *
+      <include refid="RentalUnitContentFrom" />
+      WHERE RentalUnitContentView.RentalUnitId IN
+      <iterate open="(" close=")" conjunction=",">
+        #[]#
+      </iterate>
+    </select>
+
+    <select id="SelectRentalUnitContentByMerchandisingGroupSearchCriteria" parameterClass="MerchandisingGroupSearchCriteria" resultMap="RentalUnitContentRM">
+      SELECT *
+      <include refid="RentalUnitContentFrom" />
+      WHERE RentalUnitContentView.RentalUnitId IN (SELECT RentalUnitId FROM MerchandisingGroupRentalUnits WHERE MerchandisingGroupId = #MerchandisingGroupId#)
+      <isNotEmpty property="ComplexName" prepend="AND">
+        RentalUnitContentView.ComplexName LIKE '%' + #ComplexName# + '%'
+      </isNotEmpty>
+      <isNotEmpty property="BuildingName" prepend="AND">
+        RentalUnitContentView.BuildingName LIKE '%' + #BuildingName# + '%'
+      </isNotEmpty>
+      <isNotNull property="FloorPlanType" prepend="AND">
+        RentalUnitContentView.FloorPlanType = #FloorPlanType.Code#
+      </isNotNull>
+      <isNotNull property="Bedrooms" prepend="AND">
+        RentalUnitContentView.Bedrooms = #Bedrooms.Code#
+      </isNotNull>
+      <isNotNull property="DestinationId" prepend="AND">
+        RentalUnitContentView.DestinationId = #DestinationId#
+      </isNotNull>
+      <isNotNull property="SupplierId" prepend="AND">
+        RentalUnitContentView.SupplierId = #SupplierId#
+      </isNotNull>
+      <include refid="SearchResultOrderBy" />
+    </select>
+    
+    <select id="SelectRentalUnitContentByRateCalendarSearchCriteria" parameterClass="RateCalendarSearchCriteria" resultMap="RentalUnitContentRM">
+      SELECT *
+      <include refid="RentalUnitContentFrom" />
+      INNER JOIN RentalUnits ru on ru.RentalUnitId = RentalUnitContentView.RentalUnitId
+      <isNotEmpty property="DistributionAgreementId" >
+        INNER JOIN DistributionAgreementRentalUnits daru ON daru.RentalUnitId = RentalUnitContentView.RentalUnitId
+      </isNotEmpty>
+      WHERE ru.RateCalendarId IN (SELECT RateCalendarId FROM RateCalendars (NOLOCK) WHERE RateCalendarTemplateId = #RateCalendarTemplateId#)
+      <isNotEmpty property="ComplexName" prepend="AND">
+        RentalUnitContentView.ComplexName LIKE '%' + #ComplexName# + '%'
+      </isNotEmpty>
+      <isNotEmpty property="BuildingName" prepend="AND">
+        RentalUnitContentView.BuildingName LIKE '%' + #BuildingName# + '%'
+      </isNotEmpty>
+      <isNotNull property="FloorPlanType" prepend="AND">
+        RentalUnitContentView.FloorPlanType = #FloorPlanType.Code#
+      </isNotNull>
+      <isNotNull property="Bedrooms" prepend="AND">
+        RentalUnitContentView.Bedrooms = #Bedrooms.Code#
+      </isNotNull>
+      <isNotEmpty property="DistributionAgreementId" prepend="AND">
+        daru.DistributionAgreementId = #DistributionAgreementId#
+      </isNotEmpty>
+      <include refid="SearchResultOrderBy" />
+    </select>
+
+    <select id="SelectRentalUnitsByPackageLodgingSearchCriteria" parameterClass="PackageLodgingSearchCriteria" resultMap="RentalUnitContentRM">
+      SELECT TOP $TopResults$ RentalUnitContentView.*, AVG(NightlyRates.RackRate) AS NightlyRate
+      
+      <!--,StateName,
+      Cities.*,
+      Countries.*,
+      Islands.*-->
+      
+      <include refid="RentalUnitContentFrom" />
+      LEFT JOIN NightlyRates (NOLOCK) ON NightlyRates.RentalUnitId = RentalUnitContentView.RentalUnitId
+
+      WHERE
+      RentalUnitContentView.IsAvailableForBooking = 1
+      AND RentalUnitContentView.SupIsAvailableForBooking = 1
+      AND RentalUnitContentView.IsActive = 1
+      AND RentalUnitContentView.Occupancy >= #Occupancy#
+
+      <!--Exclude Unavailable RUs-->
+      AND NOT EXISTS (
+      SELECT UnavailableTravelDatesId FROM UnavailableTravelDates (NOLOCK) WHERE RentalUnitId = RentalUnitContentView.RentalUnitId AND
+      UnavailableTravelDates.AvailabilityTypeCode  &lt;&gt; 'CALL_AND_REQUEST' AND
+      (UnavailableTravelDates.StartDate BETWEEN #TravelDates.CheckIn# AND #TravelDates.LastStayDate#
+      OR #TravelDates.CheckIn# BETWEEN UnavailableTravelDates.StartDate AND DATEADD(day, -1, UnavailableTravelDates.EndDate))
+      )
+
+      <!--Stay Restrictions-->
+      AND NOT EXISTS (
+      SELECT StayRestrictionId FROM StayRestrictions (NOLOCK) WHERE RentalUnitId = RentalUnitContentView.RentalUnitId AND MinimumNights > #TravelDates.TotalNights# AND
+      (StayRestrictions.BeginDate BETWEEN #TravelDates.CheckIn# AND #TravelDates.LastStayDate#
+      OR #TravelDates.CheckIn# BETWEEN StayRestrictions.BeginDate AND StayRestrictions.EndDate)
+      )
+      AND NOT EXISTS (
+      SELECT StayRestrictionId FROM StayRestrictions (NOLOCK) WHERE RentalUnitId = RentalUnitContentView.RentalUnitId AND TurnDay &lt;&gt; DatePart(dw,#TravelDates.CheckIn#)-1 AND
+      (StayRestrictions.BeginDate BETWEEN #TravelDates.CheckIn# AND #TravelDates.LastStayDate#
+      OR #TravelDates.CheckIn# BETWEEN StayRestrictions.BeginDate AND StayRestrictions.EndDate)
+      )
+
+      <isNotNull property="BusinessUnitId" prepend="AND">
+        RentalUnitContentView.RentalUnitId IN
+        (SELECT daru.RentalUnitId from dbo.DistributionAgreementRentalUnits daru
+        JOIN dbo.DistributionAgreements da on da.DistributionAgreementId = daru.DistributionAgreementId
+        JOIN dbo.DistributionConfigurationsDistributionAgreements dcda on dcda.DistributionAgreementId = daru.DistributionAgreementId
+        JOIN DistributionConfigurations dc on dc.DistributionConfigurationId = dcda.DistributionConfigurationId
+        JOIN BusinessUnits bu on bu.DistributionConfigurationId = dc.DistributionConfigurationId
+        WHERE bu.BusinessUnitId = #BusinessUnitId#)
+      </isNotNull>
+      <isNotNull property="TravelDates" prepend="AND">
+        NightlyRates.[Date] BETWEEN #TravelDates.CheckIn# AND #TravelDates.LastStayDate#
+      </isNotNull>
+      <isNotEmpty property="PackageDefinitionId" prepend="AND">
+        RentalUnitContentView.RentalUnitId IN (SELECT RentalUnitId FROM PackageDefinitionRentalUnits (NOLOCK) WHERE PackageDefinitionId = #PackageDefinitionId#)
+      </isNotEmpty>
+      <isNotNull property="Bedrooms" prepend="AND">
+        RentalUnitContentView.Bedrooms = #Bedrooms.Code#
+      </isNotNull>
+      <isNotNull property="BuildingType" prepend="AND">
+        RentalUnitContentView.BuildingType = #BuildingType.Code#
+      </isNotNull>
+
+      GROUP BY
+      RentalUnitContentView.RentalUnitId,
+      RentalUnitContentView.RentalUnitType,
+      RentalUnitContentView.InventoryId,
+      RentalUnitContentView.InventoryMode,
+      RentalUnitContentView.UnitNumber,
+      RentalUnitContentView.IsActive,
+      RentalUnitContentView.SupplierId,
+      RentalUnitContentView.SupIsAvailableForBooking,
+      CurrencyCode,
+      IsLuxury,
+      IsFeaturedProperty,
+      GatewayPropertyId,
+      RentalUnitContentView.IsAvailableForBooking,
+      Occupancy,
+      UnitDescription,
+      Disclaimer,
+      Bedding,
+      StayRestrictionCalendarId,
+      DisplayPhotoDisclaimer,
+      ImageCount,
+      Latitude,
+      Longitude,
+      Proximity,
+      ComplexName,
+      ComplexDescription,
+      Address1,
+      Address2,
+      PostalCode,
+      RentalUnitContentView.StateCode,
+      RentalUnitContentView.CountryCode,
+      City,
+      BuildingName,
+      BuildingDescription,
+      BuildingType,
+      FloorPlanType,
+      Bedrooms,
+      IsBathroomPrivate,
+      FullBathrooms,
+      ThreeQuarterBathrooms,
+      HalfBathrooms,
+      RentalUnitContentView.DestinationId,
+      RentalUnitContentView.CityId,
+      NeighborhoodId,
+      ResortGroupId,
+      MerchandisingOrder,
+      RentalUnitOrder,
+      RentalUnitContentView.SupplierName,
+      SupplierPrimaryDestinationId,
+      SupplierTier,
+      IsSupplierActive,
+      RandomDisplay
+      
+      <!--,
+
+      States.StateName,
+
+      Cities.CityName,
+      Cities.ISOStateCode,
+      Cities.CityId,
+      Cities.DestinationId,
+      Cities.CountryCode,
+      Cities.IslandId,
+
+      Countries.CountryCode3,
+      Countries.CountryCodeNum,
+      Countries.CountryName,
+      Countries.CountryCode,
+      Countries.ISOName,
+      Countries.IsActive,
+      Countries.HasStates,
+
+      Islands.IslandId,
+      Islands.IslandName,
+      Islands.CountryCode,
+      Islands.ISOStateCode-->
+      
+      <isNotNull property="OrderBy">
+        $OrderBy$
+      </isNotNull>
+    </select>
+  </statements>
+</sqlMap>
