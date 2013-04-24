@@ -13,6 +13,7 @@
     @Styles.Render("~/Content/themes/base/css", "~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
     @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/js")
 </head>
 <body>
     <div id="wrapper">
@@ -54,6 +55,5 @@
     </div>
 
     @RenderSection("scripts", required: false)
-    @Scripts.Render("~/js")
 </body>
 </html>

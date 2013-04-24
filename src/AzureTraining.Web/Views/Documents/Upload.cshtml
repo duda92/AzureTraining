@@ -23,12 +23,6 @@
     </div>
     
     @Html.EditorFor(x => x.Content, MVC.Shared.Views.EditorTemplates.FileEditablePreview, new { fileInputId = fileInputId, textInputId = textInputId })
-    <script>
-    $('#form').submit(function() {
-        $(this.Content).remove(); 
-        return true; //send
-    });
-    </script>
     
     <div class="control-group" data-bind="visible: fileSelected">
         <div class="controls">
@@ -43,19 +37,24 @@
         <button type="submit" class="btn btn-primary" data-bind="enable: fileSelected">Upload</button>
         <button type="button" class="btn">Cancel</button>
     </div>
-    
 }
 </div>
 <script type="text/javascript">
+
+    $('#form').submit(function() {
+        $(this.Content).remove(); 
+        return true;
+    });
+    
+
     var viewModel;
     $(function () {
         viewModel =
             {
-                maxSize: 1048576,
+                maxSize: 111048576,
                 fileTypes: ['text/plain'],
                 fileExtensions: ['txt'],
                 fileValidationMessage: ko.observable(null),
-
                 contentInput: $("#@textInputId"),
                 
                 fileSelected: ko.observable(false),
@@ -80,6 +79,7 @@
                             viewModel.fileSelected(false);
                             return;
                         }
+
                         var reader = new FileReader();
                         reader.onload = function (e)
                         {
@@ -94,12 +94,12 @@
                 {
                     if (viewModel.fileSize() > viewModel.maxSize)
                     {
-                        viewModel.fileValidationMessage("FileSize is larger than 1 mb");
+                        viewModel.fileValidationMessage("FileSize is larger than" + viewModel.maxSize + "bytes");
                         return false;
                     }
                     if ($.inArray(viewModel.fileType(), viewModel.fileTypes) == -1)
                     {
-                        viewModel.fileValidationMessage("FileType is not acceptable");
+                        viewModel.fileValidationMessage("FileType is not allowed. Use only text files with unicode encoding");
                         return false;
                     }
                     var extension = viewModel.fileName().split('.').pop();

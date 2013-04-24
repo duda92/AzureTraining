@@ -18,14 +18,15 @@ namespace AzureTraining.Worker
     {
         private readonly CloudStorageAccount storageAccount;
         private readonly IAzureLogger _logger = new AzureLogger();
-
+        private readonly PaginationService _paginator = new PaginationService();
+        
+        private QueueClient _client;
+        private bool _isStopped;
+            
         public WorkerRole()
         {
-            // This code sets up a handler to update CloudStorageAccount instances when their corresponding
-            // configuration settings change in the service configuration file.
             CloudStorageAccount.SetConfigurationSettingPublisher((configName, configSetter) =>
             {
-                // Provide the configSetter with the initial value
                 configSetter(RoleEnvironment.GetConfigurationSettingValue(configName));
 
                 RoleEnvironment.Changed += (sender, arg) =>
@@ -33,13 +34,8 @@ namespace AzureTraining.Worker
                     if (arg.Changes.OfType<RoleEnvironmentConfigurationSettingChange>()
                         .Any((change) => (change.ConfigurationSettingName == configName)))
                     {
-                        // The corresponding configuration setting has changed, propagate the value
                         if (!configSetter(RoleEnvironment.GetConfigurationSettingValue(configName)))
                         {
-                            // In this case, the change to the storage account credentials in the
-                            // service configuration is significant enough that the role needs to be
-                            // recycled in order to use the latest settings. (for example, the 
-                            // endpoint has changed)
                             RoleEnvironment.RequestRecycle();
                         }
                     }
@@ -50,11 +46,7 @@ namespace AzureTraining.Worker
             LoggingHelper.ConfigureStandartLogging();
         }
 
-        // QueueClient is thread-safe. Recommended that you cache 
-        // rather than recreating it on every request
-        QueueClient Client;
-        bool IsStopped;
-
+        
         public override void Run()
         {
             var queueClient = this.storageAccount.CreateCloudQueueClient();
@@ -83,9 +75,6 @@ namespace AzureTraining.Worker
                                 Trace.TraceError("Unknown Queue found: {0}", q.Name);
                                 break;
                         }
-
-                        // remove the message if no error has occurred
-                        // or delete if the message is poison (> 4 reads)
                         if (success || msg.DequeueCount > 4)
                         {
                             q.DeleteMessage(msg);
@@ -156,9 +145,8 @@ namespace AzureTraining.Worker
         private void PaginateDocument(Document doc, CloudBlob blob)
         {
             var content = blob.DownloadText();
-            var paginator = new PaginationService();
             int pagesCount;
-            string processed = paginator.Paginate(content, out pagesCount);
+            string processed = _paginator.Paginate(content, out pagesCount);
             doc.PagesCount = pagesCount;
             blob.UploadText(processed);
         }
@@ -181,10 +169,8 @@ namespace AzureTraining.Worker
 
         public override bool OnStart()
         {
-            // Set the maximum number of concurrent connections 
             ServicePointManager.DefaultConnectionLimit = 12;
 
-            // Create the queue if it does not exist already
             string connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
             var namespaceManager = NamespaceManager.CreateFromConnectionString(connectionString);
             if (!namespaceManager.QueueExists(Defines.DocumentsQueue))
@@ -192,17 +178,15 @@ namespace AzureTraining.Worker
                 namespaceManager.CreateQueue(Defines.DocumentsQueue);
             }
 
-            // Initialize the connection to Service Bus Queue
-            Client = QueueClient.CreateFromConnectionString(connectionString, Defines.DocumentsQueue);
-            IsStopped = false;
+            _client = QueueClient.CreateFromConnectionString(connectionString, Defines.DocumentsQueue);
+            _isStopped = false;
             return base.OnStart();
         }
 
         public override void OnStop()
         {
-            // Close the connection to Service Bus Queue
-            IsStopped = true;
-            Client.Close();
+            _isStopped = true;
+            _client.Close();
             base.OnStop();
         }
 
@@ -216,23 +200,12 @@ namespace AzureTraining.Worker
                 sleepTime = 0;
             }
 
-            // polling less than a second seems too eager
             if (sleepTime < 1000)
             {
                 sleepTime = 2000;
             }
 
             return sleepTime;
-        }
-
-        private void SendToQueue(string queueName, string msg)
-        {
-            var queues = this.storageAccount.CreateCloudQueueClient();
-
-            // TODO: add error handling and retry logic
-            var q = queues.GetQueueReference(queueName);
-            q.CreateIfNotExist();
-            q.AddMessage(new CloudQueueMessage(msg));
         }
     }
 }

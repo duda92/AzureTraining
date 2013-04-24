@@ -12,6 +12,7 @@ namespace AzureTraining.Core.WindowsAzure
     public class DocumentRepository : IDocumentRepository
     {
         private const string ContentType = "text/plain";
+        private const string FileRepeatSuffixTemplate = "_{0}";
 
         private readonly CloudStorageAccount storageAccount;
 
@@ -127,8 +128,6 @@ namespace AzureTraining.Core.WindowsAzure
         private void SendToQueue(string queueName, string msg)
         {
             var queues = this.storageAccount.CreateCloudQueueClient();
-
-            // TODO: add error handling and retry logic
             var q = queues.GetQueueReference(queueName);
             q.CreateIfNotExist();
             q.AddMessage(new CloudQueueMessage(msg));
@@ -165,16 +164,25 @@ namespace AzureTraining.Core.WindowsAzure
 
         private void SetUniqueNameAndId(Document document,  int copyNumber)
         {
-            string fileName = System.IO.Path.GetFileNameWithoutExtension(document.Name);
             string extension = System.IO.Path.GetExtension(document.Name);
-
-            var copySuffix = copyNumber == 0 ? string.Empty : string.Format("_{0}", copyNumber);
+            RemovePreviousSuffix(copyNumber, document, extension);
+            string fileName = System.IO.Path.GetFileNameWithoutExtension(document.Name);
+            
+            var copySuffix = copyNumber == 0 ? string.Empty : string.Format(FileRepeatSuffixTemplate, copyNumber);
             var identityString = document.Owner + fileName + copySuffix + extension;
 
             document.DocumentId = KeyGenerationHelper.GetSlug(identityString);
             document.Name = fileName + copySuffix + extension;
         }
-
+  
+        private void RemovePreviousSuffix(int copyNumber, Document document, string extension)
+        {
+            if (copyNumber > 1)
+            {
+                document.Name = document.Name.Replace(string.Format(FileRepeatSuffixTemplate + extension, copyNumber - 1), extension);
+            }
+        }
+ 
         private string SaveBlob(Document document, string text)
         {
             var storage = this.storageAccount.CreateCloudBlobClient();

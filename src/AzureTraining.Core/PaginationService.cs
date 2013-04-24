@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace AzureTraining.Core
 {
-    public class PaginationService
+    public class PaginationService 
     {
-        public const int PageSize = 50;
+        public const int PageSize = 3000;
+        private const string SplitRegex = @"(?<=[.!?])";
 
         public string GetDocumentPage(string documentContent, int page)
         {
-            if (!Paginated(documentContent))
+            if (!IsPaginated(documentContent))
                 return string.Empty;
 
             XmlDocument doc = new XmlDocument();
@@ -26,7 +29,7 @@ namespace AzureTraining.Core
         public string Paginate(string input, out int pagesCount)
         {
             XmlDocument doc = new XmlDocument();
-            if (Paginated(input))
+            if (IsPaginated(input))
             {
                 doc.LoadXml(input);
                 var pageNodes = doc.SelectNodes("//Page");
@@ -52,22 +55,26 @@ namespace AzureTraining.Core
         private IList<string> SeparateContent(string input)
         {
             var result = new List<string>();
-            var lenght = input.Length;
-            for (int i = 0; i < lenght; i += PageSize)
+            var sentenses = Regex.Split(input, SplitRegex);
+            var page = new StringBuilder();
+            foreach (var sentense in sentenses)
             {
-                if (!(lenght - i < PageSize))
+                if ((page.Length + sentense.Length) <= PageSize && sentense.Length <= PageSize)
                 {
-                    result.Add(input.Substring(i, PageSize));
+                    page.Append(sentense);
                 }
                 else
                 {
-                    result.Add(input.Substring(i, lenght - i));
+                    result.Add(page.ToString());
+                    page = new StringBuilder();
+                    page.Append(sentense);
                 }
             }
+            result.Add(page.ToString());
             return result;
         }
   
-        private bool Paginated(string input)
+        private bool IsPaginated(string input)
         {
             XmlDocument doc = new XmlDocument();
             try
