@@ -14,7 +14,7 @@
 
 @Html.ValidationSummaryBootstrap()
 
-@using (Html.BeginForm(MVC.Documents.ActionNames.Upload, MVC.Documents.Name, FormMethod.Post, new { @class = "form-horizontal" }))
+@using (Html.BeginForm(MVC.Documents.ActionNames.Upload, MVC.Documents.Name, FormMethod.Post, new { id = "form", @class = "form-horizontal", enctype = "multipart/form-data" }))
 {
     <div style="padding: 15px;"></div>
     
@@ -23,16 +23,12 @@
     </div>
     
     @Html.EditorFor(x => x.Content, MVC.Shared.Views.EditorTemplates.FileEditablePreview, new { fileInputId = fileInputId, textInputId = textInputId })
-
-    <div class="control-group" data-bind="visible: fileSelected">
-        <label class="control-label" for="Name">Name<span class="required">*</span></label>
-        <div class="controls">
-            <input data-val="true" data-val-length="Name of uploading file must be longer than 2 character" data-val-length-min="2" data-val-required="Set the name of file" id="Name" name="Name" type="text" data-bind="value: fileName">
-            <span class="help-inline">
-                <span class="field-validation-valid" data-valmsg-for="Name" data-valmsg-replace="true"></span>
-            </span>
-        </div>
-    </div>
+    <script>
+    $('#form').submit(function() {
+        $(this.Content).remove(); 
+        return true; //send
+    });
+    </script>
     
     <div class="control-group" data-bind="visible: fileSelected">
         <div class="controls">

@@ -46,12 +46,10 @@ namespace AzureTraining.Core.WindowsAzure
 
         public void Add(Document document, string text)
         {
-            using (var context = new DocumentsDataContext())
-            {
-                SaveEntryToTable(document, context);
-                var fileName = SaveBlob(document, text);
-                SendToQueue(Defines.DocumentsQueue, string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.Owner, document.DocumentId, fileName));
-            }
+            SaveEntryToTable(document);
+            var fileName = SaveBlob(document, text);
+            SendToQueue(Defines.DocumentsQueue, string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.Owner, document.DocumentId, fileName));
+            
         }
   
         public void Delete(string documentId)
@@ -136,16 +134,19 @@ namespace AzureTraining.Core.WindowsAzure
             q.AddMessage(new CloudQueueMessage(msg));
         }
 
-        private void SaveEntryToTable(Document document, DocumentsDataContext context)
+        private void SaveEntryToTable(Document document)
         {
             for (int copyNumber = 0; copyNumber < int.MaxValue; copyNumber++)
             {
                 try
                 {
-                    SetUniqueNameAndId(document, copyNumber);
-                    var docRow = new DocumentRow(document);
-                    context.AddObject(DocumentsDataContext.DocumentsTable, docRow);
-                    context.SaveChanges();
+                    using (var context = new DocumentsDataContext())
+                    {
+                        SetUniqueNameAndId(document, copyNumber);
+                        var docRow = new DocumentRow(document);
+                        context.AddObject(DocumentsDataContext.DocumentsTable, docRow);
+                        context.SaveChanges();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -164,11 +165,14 @@ namespace AzureTraining.Core.WindowsAzure
 
         private void SetUniqueNameAndId(Document document,  int copyNumber)
         {
+            string fileName = System.IO.Path.GetFileNameWithoutExtension(document.Name);
+            string extension = System.IO.Path.GetExtension(document.Name);
+
             var copySuffix = copyNumber == 0 ? string.Empty : string.Format("_{0}", copyNumber);
-            var identityString = document.Owner + document.Name + copySuffix;
+            var identityString = document.Owner + fileName + copySuffix + extension;
 
             document.DocumentId = KeyGenerationHelper.GetSlug(identityString);
-            document.Name = document.Name + copySuffix;
+            document.Name = fileName + copySuffix + extension;
         }
 
         private string SaveBlob(Document document, string text)

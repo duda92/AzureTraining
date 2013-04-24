@@ -30,9 +30,14 @@
     max-width: 100%;
     min-height: 500px;
     width: 100%;
+    margin-top:15px;
 }
 
 .fileupload-exists > .input-append 
 {
     font-size: 14px;
+}
+
+.word-wrap {
+    word-wrap: break-word;
 }

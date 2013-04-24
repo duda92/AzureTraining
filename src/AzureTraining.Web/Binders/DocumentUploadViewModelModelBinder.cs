@@ -23,6 +23,12 @@ namespace AzureTraining.Web.Binders
             {
                 try 
                 {
+                    if (controllerContext.RequestContext.HttpContext.Request.Files.Count != 0)
+                    {
+                        var bytes = GetBytes(controllerContext.RequestContext.HttpContext.Request.Files[0].InputStream);
+                        var content = System.Text.Encoding.Unicode.GetString(bytes);
+                        SetProperty(controllerContext, bindingContext, propertyDescriptor, content);
+                    }
                     base.BindProperty(controllerContext, bindingContext, propertyDescriptor);
                 }
                 catch (HttpRequestValidationException)

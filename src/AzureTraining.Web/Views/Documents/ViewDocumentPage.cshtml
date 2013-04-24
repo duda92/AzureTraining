@@ -1,3 +1,9 @@
 ﻿@model AzureTraining.Web.Models.DocumentPageViewViewModel
 
-@Model.Text
+<div class="control-group">
+    <textarea readonly class="file-preview">
+        @Model.Text
+    </textarea>
+</div>
+
+@Html.ActionLink("Another page", MVC.Documents.View(Model.DocumentId), new { @class = "btn btn-primary" })

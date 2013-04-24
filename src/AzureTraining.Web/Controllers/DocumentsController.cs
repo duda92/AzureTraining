@@ -48,7 +48,6 @@ namespace AzureTraining.Web.Controllers
             return RedirectToAction(MVC.Home.Index());
         }
 
-        [Authorize]
         public virtual ActionResult View(string documentId)
         {
             var owner = DocRolesHelper.CurrentOwnerKey;
@@ -62,7 +61,6 @@ namespace AzureTraining.Web.Controllers
             return View(viewModel);
         }
 
-        [Authorize]
         public virtual ActionResult ViewDocumentPage(string fileName, string documentId, int page)
         {
             var owner = DocRolesHelper.CurrentOwnerKey;
@@ -71,7 +69,10 @@ namespace AzureTraining.Web.Controllers
 
             var viewModel = new DocumentPageViewViewModel
             {
-                Text = content
+                Text = content,
+                DocumentName = fileName,
+                DocumentId = documentId, 
+                Page = page
             };
 
             return View(viewModel);
