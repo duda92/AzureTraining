@@ -14,9 +14,9 @@ namespace AzureTraining.Web.Controllers
     {
         const int pageSize = 4;
 
-        private IAzureLogger _logger;
+        private ILogger _logger;
 
-        public LogsController(IAzureLogger logger)
+        public LogsController(ILogger logger)
         {
             this._logger = logger; 
         }

@@ -10,9 +10,9 @@ namespace AzureTraining.Web.Controllers
     public partial class DocumentsController : Controller
     {
         private readonly IDocumentRepository _repository;
-        private readonly IAzureLogger _logger;
+        private readonly ILogger _logger;
 
-        public DocumentsController(IDocumentRepository repository, IAzureLogger logger)
+        public DocumentsController(IDocumentRepository repository, ILogger logger)
         {
             _repository = repository;
             _logger = logger;

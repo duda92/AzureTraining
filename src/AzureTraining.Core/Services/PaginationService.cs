@@ -7,10 +7,21 @@ using System.Xml;
 
 namespace AzureTraining.Core
 {
-    public class PaginationService 
+    public class PaginationService : IPaginationService
     {
         public const int PageSize = 3000;
         private const string SplitRegex = @"(?<=[.!?])";
+
+        public int GetPagesCount(string content)
+        {
+            if (!IsPaginated(content))
+                return -1;
+
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(content);           
+            var pageNodes = doc.SelectNodes("//Page");
+            return pageNodes.Count;      
+        }
 
         public string GetDocumentPage(string documentContent, int page)
         {
@@ -26,14 +37,12 @@ namespace AzureTraining.Core
             return node.InnerText;
         }
         
-        public string Paginate(string input, out int pagesCount)
+        public string Paginate(string input)
         {
             XmlDocument doc = new XmlDocument();
             if (IsPaginated(input))
             {
                 doc.LoadXml(input);
-                var pageNodes = doc.SelectNodes("//Page");
-                pagesCount = pageNodes.Count;
                 return input;
             }
             XmlElement root = (XmlElement)doc.AppendChild(doc.CreateElement("Document"));
@@ -48,7 +57,6 @@ namespace AzureTraining.Core
                 pageNode.Attributes.Append(pageNumberAttribute);
                 pageNode.InnerText = pageContent;
             }
-            pagesCount = pagesContent.Count;
             return doc.OuterXml;
         }
 

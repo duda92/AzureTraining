@@ -4,19 +4,30 @@ using System.Linq;
 using AzureTraceListeners.Listeners;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
+using AzureTraining.Core.WindowsAzure.Helpers;
 
-namespace AzureTraining.Core.WindowsAzure.Helpers
+namespace AzureTraining.Core.WindowsAzure.AzureLogging
 {
-    public static class LoggingHelper
+    public static class AzureDiagnostics
     {
-        public static void ConfigureStandartLogging()
+        private static readonly string DignosticsLogsTable;
+
+        static AzureDiagnostics()
+        {
+            DignosticsLogsTable = CloudConfigurationHelper.DignosticsLogsTable;
+        }
+
+        /// <summary>
+        /// Use it in Role OnStart() method if statndart logging required
+        /// </summary>
+        public static void Configure()
         {
             DiagnosticMonitorConfiguration dmc = DiagnosticMonitor.GetDefaultInitialConfiguration();
             dmc.Logs.ScheduledTransferPeriod = TimeSpan.FromMinutes(1);
             dmc.Logs.ScheduledTransferLogLevelFilter = LogLevel.Error;
 
-            string connectionString = RoleEnvironment.GetConfigurationSettingValue(CloudConfigurationHelper.SettingsKeys.DiagnosticsConnectionString);
-            Trace.Listeners.Add(new AzureTableTraceListener(RoleEnvironment.CurrentRoleInstance.Id, connectionString, "TraceLogs"));
+            string connectionString = RoleEnvironment.GetConfigurationSettingValue(SettingsKeys.DiagnosticsConnectionString);
+            Trace.Listeners.Add(new AzureTableTraceListener(RoleEnvironment.CurrentRoleInstance.Id, connectionString, DignosticsLogsTable));
             
             //Windows Event Logs
             dmc.WindowsEventLog.DataSources.Add("System!*");
@@ -34,7 +45,7 @@ namespace AzureTraining.Core.WindowsAzure.Helpers
             //IIS Logs
             dmc.Directories.ScheduledTransferPeriod = TimeSpan.FromMinutes(1.0);
 
-            DiagnosticMonitor.Start(CloudConfigurationHelper.SettingsKeys.DiagnosticsConnectionString, dmc);
+            DiagnosticMonitor.Start(SettingsKeys.DiagnosticsConnectionString, dmc);
         }
     }
 }

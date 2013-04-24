@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using AzureTraining.Core.Services;
 using AzureTraining.Core.WindowsAzure;
 using AzureTraining.Core.WindowsAzure.Helpers;
 using Microsoft.ServiceBus;
@@ -11,14 +12,16 @@ using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.StorageClient;
 using AzureTraining.Core;
+using AzureTraining.Core.WindowsAzure.AzureLogging;
 
 namespace AzureTraining.Worker
 {
     public class WorkerRole : RoleEntryPoint
     {
         private readonly CloudStorageAccount storageAccount;
-        private readonly IAzureLogger _logger = new AzureLogger();
-        private readonly PaginationService _paginator = new PaginationService();
+        private readonly ILogger _logger = new AzureLogger();
+        private readonly IPaginationService _paginator = new PaginationService();
+        private readonly ITransliterationService _transliterator = new TransliterationService();
         
         private QueueClient _client;
         private bool _isStopped;
@@ -42,8 +45,8 @@ namespace AzureTraining.Worker
                 };
             });
 
-            this.storageAccount = CloudConfigurationHelper.GetAccount();
-            LoggingHelper.ConfigureStandartLogging();
+            this.storageAccount = CloudConfigurationHelper.Account;
+            //AzureDiagnostics.Configure();
         }
 
         
@@ -145,8 +148,8 @@ namespace AzureTraining.Worker
         private void PaginateDocument(Document doc, CloudBlob blob)
         {
             var content = blob.DownloadText();
-            int pagesCount;
-            string processed = _paginator.Paginate(content, out pagesCount);
+            string processed = _paginator.Paginate(content);
+            int pagesCount = _paginator.GetPagesCount(processed);
             doc.PagesCount = pagesCount;
             blob.UploadText(processed);
         }
@@ -154,7 +157,7 @@ namespace AzureTraining.Worker
         private void TransleteDocument(CloudBlob blob)
         {
             var content = blob.DownloadText();
-            string processed = Transliteration.Front(content);
+            string processed = _transliterator.Front(content);
             blob.UploadText(processed);
         }
 

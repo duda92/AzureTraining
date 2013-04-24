@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AzureTraining.Core
 {
-    public interface IAzureLogger
+    public interface ILogger
     {
         IEnumerable<UserLog> GetLogsForDocument(string login, string documentName);
 

@@ -10,6 +10,7 @@ using AzureTraining.Web.Binders;
 using AzureTraining.Web.Models;
 using Microsoft.WindowsAzure;
 using System.Configuration;
+using AzureTraining.Core;
 
 namespace AzureTraining.Web
 {
@@ -19,13 +20,12 @@ namespace AzureTraining.Web
         {
             AreaRegistration.RegisterAllAreas();
 
-            CloudConfigurationHelper.MoveConnectionStringsToConfig(CloudConfigurationHelper.SettingsKeys.DefaultConnection);
-            CloudConfigurationHelper.MoveConnectionStringsToConfig(CloudConfigurationHelper.SettingsKeys.DataConnectionString);
-            CloudConfigurationHelper.MoveConnectionStringsToConfig(CloudConfigurationHelper.SettingsKeys.QLogDataSource);
+            ApplyCloudConfigs();
             
             WebApiConfig.Register(GlobalConfiguration.Configuration);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+            
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             BootstrapBundleConfig.RegisterBundles(BundleTable.Bundles);
             
@@ -33,12 +33,17 @@ namespace AzureTraining.Web
 
             ModelBinders.Binders.Add(typeof(DocumentUploadViewModel), new DocumentUploadViewModelModelBinder());
             
-            AuthConfig.RegisterAuth();
-
             CloudStorageAccount.SetConfigurationSettingPublisher((configName, configSetter) =>
             {
                 configSetter(ConfigurationManager.ConnectionStrings[configName].ConnectionString);
             });
+        }
+  
+        private void ApplyCloudConfigs()
+        {
+            CloudConfigurationHelper.MoveConnectionStringsToConfig(SettingsKeys.DefaultConnection);
+            CloudConfigurationHelper.MoveConnectionStringsToConfig(SettingsKeys.DataConnectionString);
+            CloudConfigurationHelper.MoveConnectionStringsToConfig(SettingsKeys.QLogDataSource);
         }
 
     }

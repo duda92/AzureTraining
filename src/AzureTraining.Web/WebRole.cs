@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using AzureTraining.Core.WindowsAzure.Helpers;
+using AzureTraining.Core.WindowsAzure.AzureLogging;
 using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace AzureTraining.Web
@@ -9,7 +9,7 @@ namespace AzureTraining.Web
     {
         public override bool OnStart()
         {
-            LoggingHelper.ConfigureStandartLogging();
+            AzureDiagnostics.Configure();
             return base.OnStart();
         }
     }

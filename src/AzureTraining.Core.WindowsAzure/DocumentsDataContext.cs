@@ -9,16 +9,17 @@
 
     public class DocumentsDataContext : TableServiceContext, IDisposable
     {
-        public const string DocumentsTable = "Documents";
-        
+        public  readonly string DocumentsTable;
+        private readonly Dictionary<string, Type> resolverTypes;
+
         private static bool initialized;
         private static readonly object initializationLock = new object();
 
-        private readonly Dictionary<string, Type> resolverTypes;
-
+        
         public DocumentsDataContext()
-            : this(CloudConfigurationHelper.GetAccount())
+            : this(CloudConfigurationHelper.Account)
         {
+            DocumentsTable = CloudConfigurationHelper.DocumentsTable;
         }
 
         public DocumentsDataContext(Microsoft.WindowsAzure.CloudStorageAccount account)
@@ -56,12 +57,10 @@
 
         static string UppercaseFirst(string s)
         {
-            // Check for empty string.
             if (string.IsNullOrEmpty(s))
             {
                 return string.Empty;
             }
-            // Return char and concat substring.
             return char.ToUpper(s[0]) + s.Substring(1);
         }
 
@@ -85,7 +84,7 @@
 
         public void Dispose()
         {
-            //TableServiceContext.Dispose();
+            
         }
     }
 }

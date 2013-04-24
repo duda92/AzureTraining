@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace AzureTraining.Web.Binders
@@ -19,22 +18,11 @@ namespace AzureTraining.Web.Binders
         
         protected override void BindProperty(ControllerContext controllerContext, ModelBindingContext bindingContext, System.ComponentModel.PropertyDescriptor propertyDescriptor)
         {
-            if (propertyDescriptor.Name == "Content")
+            if (propertyDescriptor.Name == "Content" && controllerContext.RequestContext.HttpContext.Request.Files.Count != 0)
             {
-                try 
-                {
-                    if (controllerContext.RequestContext.HttpContext.Request.Files.Count != 0)
-                    {
-                        var bytes = GetBytes(controllerContext.RequestContext.HttpContext.Request.Files[0].InputStream);
-                        var content = System.Text.Encoding.Unicode.GetString(bytes);
-                        SetProperty(controllerContext, bindingContext, propertyDescriptor, content);
-                    }
-                    base.BindProperty(controllerContext, bindingContext, propertyDescriptor);
-                }
-                catch (HttpRequestValidationException)
-                {
-                    bindingContext.ModelState.AddModelError("Content", "File content doesn't looks like a simple text file");
-                }
+                var bytes = GetBytes(controllerContext.RequestContext.HttpContext.Request.Files[0].InputStream);
+                var content = System.Text.Encoding.Unicode.GetString(bytes);
+                SetProperty(controllerContext, bindingContext, propertyDescriptor, content);
                 return;
             }
             base.BindProperty(controllerContext, bindingContext, propertyDescriptor);

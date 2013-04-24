@@ -2,24 +2,19 @@
 using System.Linq;
 using System.Collections.Generic;
 
-namespace AzureTraining.Core.WindowsAzure
+namespace AzureTraining.Core.Services
 {
-    public enum TransliterationType
-    {
-        Gost,
-        ISO
-    }
-
-    public static class Transliteration
+    public class TransliterationService : ITransliterationService
     {
         private static Dictionary<string, string> gost = new Dictionary<string, string>(); // 16876-71
         private static Dictionary<string, string> iso = new Dictionary<string, string>(); //ISO 9-95
-
-        public static string Front(string text)
+        
+        public string Front(string text)
         {
             return Front(text, TransliterationType.ISO);
         }
-        public static string Front(string text, TransliterationType type)
+        
+        public string Front(string text, TransliterationType type)
         {
             string output = text;
             Dictionary<string, string> tdict = GetDictionaryByType(type);
@@ -30,11 +25,11 @@ namespace AzureTraining.Core.WindowsAzure
             }
             return output;
         }
-        public static string Back(string text)
+        public string Back(string text)
         {
             return Back(text, TransliterationType.ISO);
         }
-        public static string Back(string text, TransliterationType type)
+        public string Back(string text, TransliterationType type)
         {
             string output = text;
             Dictionary<string, string> tdict = GetDictionaryByType(type);
@@ -53,7 +48,7 @@ namespace AzureTraining.Core.WindowsAzure
             return tdict;
         }
 
-        static Transliteration()
+        static TransliterationService()
         {
             gost.Add("Є", "EH");
             gost.Add("І", "I");

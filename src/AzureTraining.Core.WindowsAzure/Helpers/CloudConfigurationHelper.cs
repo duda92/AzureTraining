@@ -9,18 +9,43 @@ namespace AzureTraining.Core.WindowsAzure.Helpers
 {
     public static class CloudConfigurationHelper
     {
-        public static class SettingsKeys 
-        {
-            public const string DefaultConnection = "DefaultConnection";
-            public const string DataConnectionString = "DataConnectionString";
-            public const string QLogDataSource = "QLogDataSource";
-            public const string DiagnosticsConnectionString = "Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString";
-        };
+        private const string ProviderName = "System.Data.SqlClient";
 
+        public static CloudStorageAccount Account
+        {
+            get
+            {
+                return CloudStorageAccount.FromConfigurationSetting(SettingsKeys.DataConnectionString);
+            }
+        }
+
+        public static string DignosticsLogsTable
+        {
+            get
+            {
+                return RoleEnvironment.GetConfigurationSettingValue(SettingsKeys.DignosticsLogsTable);
+            }
+        }
+
+        public static string LogsTable
+        {
+            get
+            {
+                return RoleEnvironment.GetConfigurationSettingValue(SettingsKeys.LogsTable);
+            }
+        }
+
+        public static string DocumentsTable
+        {
+            get
+            {
+                return RoleEnvironment.GetConfigurationSettingValue(SettingsKeys.DocumentsTable);
+            }
+        }
+        
         public static void MoveConnectionStringsToConfig(string connectionStringKey)
         {
             string connectionString = RoleEnvironment.GetConfigurationSettingValue(connectionStringKey);
-            //Obtain the RuntimeConfig type. and instance
             Type runtimeConfig = Type.GetType("System.Web.Configuration.RuntimeConfig, System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             var runtimeConfigInstance = runtimeConfig.GetMethod("GetAppConfig", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, null);
 
@@ -28,12 +53,7 @@ namespace AzureTraining.Core.WindowsAzure.Helpers
             var connectionStrings = connectionStringSection.GetType().GetProperty("ConnectionStrings", BindingFlags.Public | BindingFlags.Instance).GetValue(connectionStringSection, null);
             typeof(ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(connectionStrings, false);
 
-            ((ConnectionStringsSection)connectionStringSection).ConnectionStrings.Add(new ConnectionStringSettings(connectionStringKey, connectionString, "System.Data.SqlClient"));
-        }
-
-        public static CloudStorageAccount GetAccount()
-        {
-            return CloudStorageAccount.FromConfigurationSetting(SettingsKeys.DataConnectionString);
+            ((ConnectionStringsSection)connectionStringSection).ConnectionStrings.Add(new ConnectionStringSettings(connectionStringKey, connectionString, ProviderName));
         }
     }
 }

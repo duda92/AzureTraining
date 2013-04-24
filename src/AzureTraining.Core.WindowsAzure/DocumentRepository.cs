@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
-using System.Diagnostics;
 using System.Collections.Generic;
 using AzureTraining.Core.WindowsAzure.Helpers;
 
@@ -18,7 +17,7 @@ namespace AzureTraining.Core.WindowsAzure
 
         public DocumentRepository()
         {
-            this.storageAccount = CloudConfigurationHelper.GetAccount();
+            this.storageAccount = CloudConfigurationHelper.Account;
         }
 
         public IEnumerable<Document> GetAccessDocumentsForUser(string user)
@@ -71,7 +70,7 @@ namespace AzureTraining.Core.WindowsAzure
             var context = new DocumentsDataContext();
             var documentRow = new DocumentRow(document);
 
-            context.AttachTo(DocumentsDataContext.DocumentsTable, documentRow, "*");
+            context.AttachTo(context.DocumentsTable, documentRow, "*");
             context.DeleteObject(documentRow);
             context.SaveChanges();
 
@@ -85,7 +84,7 @@ namespace AzureTraining.Core.WindowsAzure
             using (var context = new DocumentsDataContext())
             {
                 var documentRow = new DocumentRow(document);
-                context.AttachTo(DocumentsDataContext.DocumentsTable, documentRow, "*");
+                context.AttachTo(context.DocumentsTable, documentRow, "*");
                 context.UpdateObject(documentRow);
                 context.SaveChanges();
             }
@@ -101,27 +100,6 @@ namespace AzureTraining.Core.WindowsAzure
                 var paginationService = new PaginationService();
                 var content = paginationService.GetDocumentPage(documentContent, page);
                 return content;
-            }
-        }
-
-        public void BootstrapUser(string userName)
-        {
-            // provision a container for the user's blobs
-            var client = this.storageAccount.CreateCloudBlobClient();
-            var container = client.GetContainerReference(userName.ToLowerInvariant());
-
-            bool success = container.CreateIfNotExist();
-
-            // set to public access
-            container.SetPermissions(
-                new BlobContainerPermissions()
-                {
-                    PublicAccess = BlobContainerPublicAccessType.Container
-                });
-
-            if (!success)
-            {
-                Trace.TraceError("Failed to create container for {0}", userName);
             }
         }
 
@@ -143,7 +121,7 @@ namespace AzureTraining.Core.WindowsAzure
                     {
                         SetUniqueNameAndId(document, copyNumber);
                         var docRow = new DocumentRow(document);
-                        context.AddObject(DocumentsDataContext.DocumentsTable, docRow);
+                        context.AddObject(context.DocumentsTable, docRow);
                         context.SaveChanges();
                     }
                 }

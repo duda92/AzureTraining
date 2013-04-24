@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AzureTraining.Core.WindowsAzure.Helpers;
-using Microsoft.WindowsAzure.StorageClient;
-using QLog.Models;
 using QLog;
 
-namespace AzureTraining.Core.WindowsAzure
+namespace AzureTraining.Core.WindowsAzure.AzureLogging
 {
-    public class AzureLogger : IAzureLogger
+    public class AzureLogger : ILogger
     {
         public void DocumentProcessingFinished(string owner, string documentName)
         {
@@ -63,36 +60,6 @@ namespace AzureTraining.Core.WindowsAzure
                 var logs = context.LogEntries.Where(x => x.User == login && x.DocumentName == documentName).ToList().ToModel();
                 return logs;
             }
-        }
-    }
-
-
-    public class LogsDataContext : TableServiceContext, IDisposable
-    {
-        public const string LogsTable = "qlog";
-
-        public LogsDataContext()
-            : this(CloudConfigurationHelper.GetAccount())
-        {
-        }
-
-        public LogsDataContext(Microsoft.WindowsAzure.CloudStorageAccount account)
-            : base(account.TableEndpoint.ToString(), account.Credentials)
-        {
-            
-        }
-
-        public IQueryable<QLogEntry> LogEntries
-        {
-            get
-            {
-                return this.CreateQuery<QLogEntry>(LogsTable);
-            }
-        }
-
-        public void Dispose()
-        {
-            //todo: clarify how to dispose context
         }
     }
 }
