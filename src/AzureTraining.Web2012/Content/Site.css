@@ -1,0 +1,43 @@
+﻿/*_LoginPartial.cshtml*/
+.log-off-form {
+    padding: 10px 15px 10px;
+}
+
+.log-off-form a {
+    color: #999999;
+    text-decoration: none;
+}
+
+.log-off-form a:hover {
+    color: #fff;
+}
+
+/*File upload previrew*/
+
+.unvisible
+{
+    visibility:hidden;
+}
+
+.visible
+{
+    visibility:visible;
+}
+
+.file-preview 
+{
+    max-height: 500px;
+    max-width: 100%;
+    min-height: 500px;
+    width: 100%;
+    margin-top:15px;
+}
+
+.fileupload-exists > .input-append 
+{
+    font-size: 14px;
+}
+
+.word-wrap {
+    word-wrap: break-word;
+}

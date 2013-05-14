@@ -1,0 +1,129 @@
+﻿@using AzureTraining.Web.Helpers;
+@model AzureTraining.Web.Models.DocumentUploadViewModel
+
+@{
+    var fileInputId = "file";
+    var textInputId = "Content";
+}
+
+<div class="progress progress-striped active" id="loading" style="padding:40px">
+  <div class="bar" style="width: 100%;"></div>
+</div>
+
+<div id="page" style="visibility:hidden">
+
+@Html.ValidationSummaryBootstrap()
+
+@using (Html.BeginForm(MVC.Documents.ActionNames.Upload, MVC.Documents.Name, FormMethod.Post, new { id = "form", @class = "form-horizontal", enctype = "multipart/form-data" }))
+{
+    <div style="padding: 15px;"></div>
+    
+    <div class="alert alert-error" data-bind="visible: fileValidationMessage() != null, html: fileValidationMessage" >
+        
+    </div>
+    
+    @Html.EditorFor(x => x.Content, MVC.Shared.Views.EditorTemplates.FileEditablePreview, new { fileInputId = fileInputId, textInputId = textInputId })
+    
+    <div class="control-group" data-bind="visible: fileSelected">
+        <div class="controls">
+            <label class="checkbox" for="IsShared">
+                Is Shared
+                @Html.CheckBoxFor(x => x.IsShared)
+            </label>
+        </div>
+    </div>
+   
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary" data-bind="enable: fileSelected">Upload</button>
+        <button type="button" class="btn">Cancel</button>
+    </div>
+}
+</div>
+<script type="text/javascript">
+
+    $('#form').submit(function() {
+        $(this.Content).remove(); 
+        return true;
+    });
+    
+
+    var viewModel;
+    $(function () {
+        viewModel =
+            {
+                maxSize: 111048576,
+                fileTypes: ['text/plain'],
+                fileExtensions: ['txt'],
+                fileValidationMessage: ko.observable(null),
+                contentInput: $("#@textInputId"),
+                
+                fileSelected: ko.observable(false),
+                fileSize: ko.observable(0),
+                fileType: ko.observable(),
+                fileName: ko.observable(),
+
+                SelectFile: function(file)
+                {
+                    if (typeof (file) == "undefined")
+                    {
+                        viewModel.fileSelected(false);
+                    }
+                    else
+                    {
+                        viewModel.fileSize(file.size);
+                        viewModel.fileType(file.type);
+                        viewModel.fileName(file.name);
+
+                        if (!viewModel.ValidateFile())
+                        {
+                            viewModel.fileSelected(false);
+                            return;
+                        }
+
+                        var reader = new FileReader();
+                        reader.onload = function (e)
+                        {
+                            viewModel.contentInput.html(e.target.result);
+                            viewModel.fileSelected(true);
+                        };
+                        reader.readAsText(file)
+                    }
+                },
+
+                ValidateFile: function (file)
+                {
+                    if (viewModel.fileSize() > viewModel.maxSize)
+                    {
+                        viewModel.fileValidationMessage("FileSize is larger than" + viewModel.maxSize + "bytes");
+                        return false;
+                    }
+                    if ($.inArray(viewModel.fileType(), viewModel.fileTypes) == -1)
+                    {
+                        viewModel.fileValidationMessage("FileType is not allowed. Use only text files with unicode encoding");
+                        return false;
+                    }
+                    var extension = viewModel.fileName().split('.').pop();
+                    if ($.inArray(extension, viewModel.fileExtensions) == -1)
+                    {
+                        viewModel.fileValidationMessage("FileExtension is not acceptable");
+                        return false;
+                    }
+
+                    viewModel.fileValidationMessage(null);
+                    return true;
+                }
+            };
+        ko.applyBindings(viewModel);
+        
+        $("#loading").hide();
+        $("#page").css('visibility', 'visible');
+
+        $("#@fileInputId").change(function (e)
+        {
+            var file = e.target.files[0];
+            viewModel.SelectFile(file);
+        });
+    })
+</script>
+
+

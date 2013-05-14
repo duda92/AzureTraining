@@ -7,6 +7,9 @@
       <Setting name="DataConnectionString" value="DefaultEndpointsProtocol=https;AccountName=azuretrainingdata;AccountKey=yslr2FIpoAwefFNWoknV6wP4Jbp41TlKv2Q2aDbA9hrg3v2iIiA3Maa/mcGbGoGuhRVsO6MNrLyJ8sWb3nAxuA==" />
       <Setting name="DefaultConnection" value="Data Source=tcp:t59mmz5sqw.database.windows.net,1433;Initial Catalog=AzureTrainingDev;User ID=bdudnik@t59mmz5sqw;Password=Dudadudl1###" />
       <Setting name="QLogDataSource" value="DefaultEndpointsProtocol=https;AccountName=azuretrainingdata;AccountKey=yslr2FIpoAwefFNWoknV6wP4Jbp41TlKv2Q2aDbA9hrg3v2iIiA3Maa/mcGbGoGuhRVsO6MNrLyJ8sWb3nAxuA==" />
+      <Setting name="Diagnostics" value="Diagnostics" />
+      <Setting name="DocumentsTable" value="Documents" />
+      <Setting name="QLog" value="QLog" />
     </ConfigurationSettings>
   </Role>
   <Role name="AzureTraining.Worker">
@@ -16,6 +19,7 @@
       <Setting name="Microsoft.ServiceBus.ConnectionString" value="Endpoint=sb://azuretrainingservicebus.servicebus.windows.net/;SharedSecretIssuer=owner;SharedSecretValue=QL8ab5A+dq0L5+REyBkH5G2Ffz/5lVXa+yuUqAhDcd8=" />
       <Setting name="DataConnectionString" value="DefaultEndpointsProtocol=https;AccountName=azuretrainingdata;AccountKey=yslr2FIpoAwefFNWoknV6wP4Jbp41TlKv2Q2aDbA9hrg3v2iIiA3Maa/mcGbGoGuhRVsO6MNrLyJ8sWb3nAxuA==" />
       <Setting name="WorkerSleepTime" value="2000" />
+      <Setting name="QLog" value="QLog" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

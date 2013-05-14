@@ -1,0 +1,33 @@
+﻿@model string
+
+@{
+    var fileInputId = ViewData["fileInputId"] != null ? (string)ViewData["fileInputId"] : "file";
+    var fileInputName = fileInputId;
+
+    var textInputId = ViewData["textInputId"] != null ? (string)ViewData["textInputId"] : "Content";
+    var textInputName = textInputId;
+    
+}
+
+<div class="control-group">
+    <label class="control-label" for="Name">FileName</label>
+    <div class="controls">
+        <div class="fileupload fileupload-new" data-provides="fileupload">
+            <div class="input-append">
+                <span id="fileName" data-bind="visible: fileSelected, html: fileName"></span>
+                <span class="btn btn-file">
+                    <span class="fileupload-new">Select file</span>
+                    <span class="fileupload-exists">Change</span>
+                    <input type="file" id="@fileInputId" name="@fileInputName" />
+                    <input type="hidden" id="Name" name="Name" type="text" data-bind="value: fileName" />
+                </span>
+                <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="control-group">
+    <textarea readonly name="@textInputName" id="@textInputId" class="file-preview" data-bind="visible: fileSelected"></textarea>
+</div>
+

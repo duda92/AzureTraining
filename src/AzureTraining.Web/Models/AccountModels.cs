@@ -1,7 +1,7 @@
-﻿using AzureTraining.Core;
-using System;
+﻿using System.Data.Linq.Mapping;
+using System.Web.Mvc;
+using AzureTraining.Core;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 
 namespace AzureTraining.Web.Models
@@ -16,11 +16,9 @@ namespace AzureTraining.Web.Models
         public DbSet<UserProfile> UserProfiles { get; set; }
     }
 
-    [Table("UserProfile")]
     public class UserProfile
     {
         [Key]
-        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         public int UserId { get; set; }
         public string UserName { get; set; }
     }

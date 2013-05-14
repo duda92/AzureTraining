@@ -19,12 +19,13 @@
         public DocumentsDataContext()
             : this(CloudConfigurationHelper.Account)
         {
-            DocumentsTable = CloudConfigurationHelper.DocumentsTable;
+            
         }
 
-        public DocumentsDataContext(Microsoft.WindowsAzure.CloudStorageAccount account)
+        public DocumentsDataContext(CloudStorageAccount account)
             : base(account.TableEndpoint.ToString(), account.Credentials)
         {
+            DocumentsTable = CloudConfigurationHelper.DocumentsTable;
             if (!initialized)
             {
                 lock (initializationLock)

@@ -37,9 +37,12 @@
     <ServiceConfiguration Include="ServiceConfiguration.Cloud.cscfg" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Profiles" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\AzureTraining.Web\AzureTraining.Web.csproj">
       <Name>AzureTraining.Web</Name>
-      <Project>{aa4a93ce-d263-44a8-8f46-74ff4a5384f3}</Project>
+      <Project>{c91c254f-1410-4ed1-af5b-9096ddb6c60d}</Project>
       <Private>True</Private>
       <RoleType>Web</RoleType>
       <RoleName>AzureTraining.Web</RoleName>
@@ -47,15 +50,12 @@
     </ProjectReference>
     <ProjectReference Include="..\AzureTraining.Worker\AzureTraining.Worker.csproj">
       <Name>AzureTraining.Worker</Name>
-      <Project>{15b3e0d2-6217-493a-a690-158c497f5318}</Project>
+      <Project>{2b11b928-71c8-49a4-ae71-2b3f8b1d1ef7}</Project>
       <Private>True</Private>
       <RoleType>Worker</RoleType>
       <RoleName>AzureTraining.Worker</RoleName>
       <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Profiles" />
   </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>

@@ -11,7 +11,7 @@ namespace AzureTraining.Core
         public const string DiagnosticsConnectionString = "Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString";
 
         public const string LogsTable = "QLog";
-        public const string DignosticsLogsTable = "Dignostics";
+        public const string DignosticsLogsTable = "Diagnostics";
 
         public static string DocumentsTable = "DocumentsTable";
     };

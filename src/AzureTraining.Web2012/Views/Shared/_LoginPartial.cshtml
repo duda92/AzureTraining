@@ -1,0 +1,18 @@
+﻿<ul class="nav">
+    @if (Request.IsAuthenticated)
+    {
+        <li>@Html.ActionLink(User.Identity.Name, MVC.Account.Manage())</li>
+            
+        <li>@using (Html.BeginForm(MVC.Account.LogOff(), FormMethod.Post, new { id = "logoutForm", @class = "log-off-form" }))
+            {
+                @Html.AntiForgeryToken()
+                <a href="javascript:document.getElementById('logoutForm').submit()">Log off</a>
+            }
+        </li>
+    }
+    else
+    {
+        <li>@Html.ActionLink("Register", MVC.Account.Register())</li>
+        <li>@Html.ActionLink("Log in", MVC.Account.Login())</li>
+    }
+</ul>
