@@ -417,7 +417,6 @@
     <Content Include="Views\Shared\EditorTemplates\FileEditablePreview.cshtml" />
     <Content Include="Views\Documents\View.cshtml" />
     <Content Include="Views\Logs\Index.cshtml" />
-    <Content Include="Views\Documents\ViewDocumentPage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

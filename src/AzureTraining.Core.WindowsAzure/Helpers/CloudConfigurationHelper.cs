@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Configuration;
-using System.Linq;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using System.Reflection;
 using Microsoft.WindowsAzure;

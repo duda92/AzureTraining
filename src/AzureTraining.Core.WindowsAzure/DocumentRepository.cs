@@ -17,7 +17,7 @@ namespace AzureTraining.Core.WindowsAzure
 
         public DocumentRepository()
         {
-            this.storageAccount = CloudConfigurationHelper.Account;
+            storageAccount = CloudConfigurationHelper.Account;
         }
 
         public IEnumerable<Document> GetAccessDocumentsForUser(string user)
@@ -60,7 +60,7 @@ namespace AzureTraining.Core.WindowsAzure
 
                 if (document != null)
                 {
-                    this.Delete(document);
+                    Delete(document);
                 }
             }
         }
@@ -74,7 +74,7 @@ namespace AzureTraining.Core.WindowsAzure
             context.DeleteObject(documentRow);
             context.SaveChanges();
 
-            this.SendToQueue(
+            SendToQueue(
                 Defines.DocumentsCleanupQueue,
                 string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.DocumentId, document.Owner, document.Url));
         }
@@ -90,7 +90,7 @@ namespace AzureTraining.Core.WindowsAzure
             }
         }
 
-        public string GetPageContent(string owner, string documentId, string fileName, int page)
+        public string GetPageContent(string owner, string documentId, int page)
         {
             using (var context = new DocumentsDataContext())
             {
@@ -131,10 +131,7 @@ namespace AzureTraining.Core.WindowsAzure
                     {
                         continue;
                     }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
                 break;
             }
@@ -163,7 +160,7 @@ namespace AzureTraining.Core.WindowsAzure
  
         private string SaveBlob(Document document, string text)
         {
-            var storage = this.storageAccount.CreateCloudBlobClient();
+            var storage = storageAccount.CreateCloudBlobClient();
             var container = storage.GetContainerReference(document.Owner.ToLowerInvariant());
             container.CreateIfNotExist();
             container.SetPermissions(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
@@ -176,8 +173,8 @@ namespace AzureTraining.Core.WindowsAzure
 
         private string GetDocumentText(Document document)
         {
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-            CloudBlobContainer container = blobClient.GetContainerReference(document.Owner);
+            var blobClient = storageAccount.CreateCloudBlobClient();
+            var container = blobClient.GetContainerReference(document.Owner);
             var blob = container.GetBlobReference(document.Name);
             var text = blob.DownloadText();
             return text;

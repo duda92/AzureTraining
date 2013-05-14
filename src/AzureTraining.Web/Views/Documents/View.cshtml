@@ -1,19 +1,26 @@
 ﻿@model AzureTraining.Web.Models.DocumentViewViewModel
 
-@Model.Document.Name
+<div class="row">     
+    <div class="span12">         
+        <h4>@Model.Document.Name</h4>             
+    </div> 
+</div>
 
-<ul class="thumbnails">
+<div class="control-group">
+    <textarea readonly="readonly" class="file-preview">
+        @Model.DocumentPageViewViewModel.Text
+    </textarea>
+</div>                  
+
+<div class="row">     
+    <div class="span12">         
+        <h4>@(Model.DocumentPageViewViewModel.Page + 1)</h4>             
+    </div> 
+</div>
+
+<div class="main-content">
     @for (var page = 0; page < Model.Document.PagesCount; page++)
     {
-    <li class="span4">
-        <div class="thumbnail">
-            <div class="caption">
-                <h3>@(page+1)</h3>
-                <p>
-                    @Html.ActionLink("View", MVC.Documents.ViewDocumentPage(Model.Document.Name, Model.Document.DocumentId, page), new { @class = "btn btn-primary" })
-                </p>
-            </div>
-        </div>
-    </li>
+        @Html.ActionLink((page + 1).ToString(), MVC.Documents.View(Model.Document.DocumentId, page), new { @class = "btn btn-primary page-button" })
     }
-</ul>
+</div>

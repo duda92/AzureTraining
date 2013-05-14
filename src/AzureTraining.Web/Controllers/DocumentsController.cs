@@ -1,8 +1,6 @@
 ﻿using AzureTraining.Core;
 using AzureTraining.Web.Helpers;
 using AzureTraining.Web.Models;
-using System;
-using System.Linq;
 using System.Web.Mvc;
 
 namespace AzureTraining.Web.Controllers
@@ -21,7 +19,7 @@ namespace AzureTraining.Web.Controllers
         [Authorize]
         public virtual ActionResult Upload()
         {
-            DocumentUploadViewModel documentViewModel = new DocumentUploadViewModel { };
+            var documentViewModel = new DocumentUploadViewModel();
             return View(documentViewModel);
         }
 
@@ -48,31 +46,22 @@ namespace AzureTraining.Web.Controllers
             return RedirectToAction(MVC.Home.Index());
         }
 
-        public virtual ActionResult View(string documentId)
+        public virtual ActionResult View(string documentId, int page = 0)
         {
             var owner = DocRolesHelper.CurrentOwnerKey;
             var document =_repository.GetDocumentById(owner, documentId);
+            var content = _repository.GetPageContent(owner, documentId, page);
 
             var viewModel = new DocumentViewViewModel
             {
-                Document = document
-            };
-
-            return View(viewModel);
-        }
-
-        public virtual ActionResult ViewDocumentPage(string fileName, string documentId, int page)
-        {
-            var owner = DocRolesHelper.CurrentOwnerKey;
-
-            var content = _repository.GetPageContent(owner, documentId, fileName, page);
-
-            var viewModel = new DocumentPageViewViewModel
-            {
-                Text = content,
-                DocumentName = fileName,
-                DocumentId = documentId, 
-                Page = page
+                Document = document,
+                DocumentPageViewViewModel = new DocumentPageViewViewModel
+                {
+                    Text = content,
+                    DocumentName = "fileName",
+                    DocumentId = documentId, 
+                    Page = page
+                }
             };
 
             return View(viewModel);

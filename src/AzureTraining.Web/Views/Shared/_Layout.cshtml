@@ -15,45 +15,47 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/js")
 </head>
-<body>
-    <div id="wrapper">
-        <div class="navbar navbar-inverse navbar-fixed-top">
-            <div class="navbar-inner">
-                <div class="container">
-                    <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <div class="nav-collapse collapse">
-                        <ul class="nav">
-                            <li>@Html.ActionLink("Home", MVC.Home.Index())</li>
-                            @if (User.Identity.IsAuthenticated)
-                            {
-                                <li>@Html.ActionLink("Upload", MVC.Documents.Upload())</li> 
-                                <li>@Html.ActionLink("Logs", MVC.Logs.Index())</li>
-                            }
-                        </ul>
-                    </div>
-                    <div class="navbar-form pull-right">
-                        @Html.Partial("_LoginPartial")
+    <body>
+        <header class="jumbotron subhead"> 
+        </header>
+        <div id="wrapper">
+            <div class="navbar navbar-inverse navbar-fixed-top">
+                <div class="navbar-inner">
+                    <div class="container">
+                        <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav">
+                                <li>@Html.ActionLink("Home", MVC.Home.Index())</li>
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    <li>@Html.ActionLink("Upload", MVC.Documents.Upload())</li> 
+                                    <li>@Html.ActionLink("Logs", MVC.Logs.Index())</li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="navbar-form pull-right">
+                            @Html.Partial("_LoginPartial")
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <div class="container">
+                @RenderSection("featured", required: false)
+                <section class="content-wrapper main-content clear-fix">
+                    @RenderBody()
+                </section>
+            </div>
+            <div id="push"></div>
+        </div>
+        <div id="footer">
+            <div class="container"></div>
         </div>
 
-        <div class="container">
-            @RenderSection("featured", required: false)
-            <section class="content-wrapper main-content clear-fix">
-                @RenderBody()
-            </section>
-        </div>
-        <div id="push"></div>
-    </div>
-    <div id="footer">
-        <div class="container"></div>
-    </div>
-
-    @RenderSection("scripts", required: false)
-</body>
+        @RenderSection("scripts", required: false)
+    </body>
 </html>

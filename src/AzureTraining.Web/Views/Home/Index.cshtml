@@ -11,19 +11,28 @@
                 <h3>@doc.Name</h3>
                 <p>@doc.Preview</p>
                 <p>
-                    <a class="btn btn-primary btn-large" href="@doc.Url">Download</a>
-                    @Html.ActionLink("View", MVC.Documents.View(@doc.DocumentId), new { @class = "btn btn-primary btn-large" })
-                    @if (DocRolesHelper.IsCurrentUserOwnerOfDocument(doc))
-                    {
-                        if (doc.IsShared)
-                        {
-                            @Html.ActionLink("Protect", MVC.Documents.ChangeViewPolicy(doc.DocumentId, false), new { @class = "btn btn-primary btn-large" }) 
-                        }
-                        else
-                        {
-                            @Html.ActionLink("Share", MVC.Documents.ChangeViewPolicy(@doc.DocumentId, true), new { @class = "btn btn-primary btn-large" })
-                        }
-                    }
+                    <div class="btn-group">
+                        <button class="btn btn-large dropdown-toggle" data-toggle="dropdown">
+                            Actions <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="@doc.Url">Downdolad</a></li>
+                            <li>@Html.ActionLink("View", MVC.Documents.View(@doc.DocumentId))</li>
+                            <li>
+                                @if (DocRolesHelper.IsCurrentUserOwnerOfDocument(doc))
+                                      {
+                                          if (doc.IsShared)
+                                          {
+                                              @Html.ActionLink("Protect", MVC.Documents.ChangeViewPolicy(doc.DocumentId, false)) 
+                                          }
+                                          else
+                                          {
+                                              @Html.ActionLink("Share", MVC.Documents.ChangeViewPolicy(@doc.DocumentId, true))
+                                          }
+                                      }
+                            </li>  
+                        </ul>
+                    </div>
                 </p>
             </div>
         </div>

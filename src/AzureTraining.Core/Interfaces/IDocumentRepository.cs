@@ -12,7 +12,7 @@ namespace AzureTraining.Core
 
         Document GetDocumentById(string owner, string documentId);
         
-        string GetPageContent(string owner, string documentId, string fileName, int page);
+        string GetPageContent(string owner, string documentId, int page);
 
         void Add(Document document, string text);
 

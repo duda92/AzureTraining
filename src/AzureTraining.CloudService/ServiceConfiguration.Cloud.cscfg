@@ -20,6 +20,7 @@
       <Setting name="DataConnectionString" value="DefaultEndpointsProtocol=https;AccountName=azuretrainingdata;AccountKey=yslr2FIpoAwefFNWoknV6wP4Jbp41TlKv2Q2aDbA9hrg3v2iIiA3Maa/mcGbGoGuhRVsO6MNrLyJ8sWb3nAxuA==" />
       <Setting name="WorkerSleepTime" value="2000" />
       <Setting name="QLog" value="QLog" />
+      <Setting name="DocumentsTable" value="Documents" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

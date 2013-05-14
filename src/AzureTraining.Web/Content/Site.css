@@ -41,3 +41,20 @@
 .word-wrap {
     word-wrap: break-word;
 }
+
+.row {
+    text-align: center;
+}
+
+.page-button {
+    min-width: 30px;margin: 10px;    
+}
+
+textarea[readonly="readonly"]
+{
+    cursor: default
+}
+
+.subhead {
+    height: 40px;
+}

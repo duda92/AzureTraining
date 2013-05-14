@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Web.Mvc;
 using AzureTraining.Core;
-using AzureTraining.Web.Models;
 using PagedList;
 
 namespace AzureTraining.Web.Controllers
@@ -12,13 +8,13 @@ namespace AzureTraining.Web.Controllers
     [Authorize]
     public partial class LogsController : Controller
     {
-        const int pageSize = 4;
+        const int PageSize = 10;
 
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public LogsController(ILogger logger)
         {
-            this._logger = logger; 
+            _logger = logger; 
         }
 
         public virtual ActionResult Index(int page = 1, string documentName = null, bool orderByDate = false)
@@ -32,7 +28,7 @@ namespace AzureTraining.Web.Controllers
             ViewBag.documentName = documentName;
             ViewBag.orderByDate = orderByDate;
 
-            return View(logs.ToPagedList(page, pageSize));
+            return View(logs.ToPagedList(page, PageSize));
         }
     }
 }

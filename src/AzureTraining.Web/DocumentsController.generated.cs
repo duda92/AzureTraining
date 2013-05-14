@@ -49,12 +49,6 @@ namespace AzureTraining.Web.Controllers
         }
         [NonAction]
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        public virtual System.Web.Mvc.ActionResult ViewDocumentPage()
-        {
-            return new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.ViewDocumentPage);
-        }
-        [NonAction]
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
         public virtual System.Web.Mvc.ActionResult ChangeViewPolicy()
         {
             return new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.ChangeViewPolicy);
@@ -77,7 +71,6 @@ namespace AzureTraining.Web.Controllers
         {
             public readonly string Upload = "Upload";
             public readonly string View = "View";
-            public readonly string ViewDocumentPage = "ViewDocumentPage";
             public readonly string ChangeViewPolicy = "ChangeViewPolicy";
         }
 
@@ -86,7 +79,6 @@ namespace AzureTraining.Web.Controllers
         {
             public const string Upload = "Upload";
             public const string View = "View";
-            public const string ViewDocumentPage = "ViewDocumentPage";
             public const string ChangeViewPolicy = "ChangeViewPolicy";
         }
 
@@ -105,15 +97,6 @@ namespace AzureTraining.Web.Controllers
         [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
         public class ActionParamsClass_View
         {
-            public readonly string documentId = "documentId";
-        }
-        static readonly ActionParamsClass_ViewDocumentPage s_params_ViewDocumentPage = new ActionParamsClass_ViewDocumentPage();
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        public ActionParamsClass_ViewDocumentPage ViewDocumentPageParams { get { return s_params_ViewDocumentPage; } }
-        [GeneratedCode("T4MVC", "2.0"), DebuggerNonUserCode]
-        public class ActionParamsClass_ViewDocumentPage
-        {
-            public readonly string fileName = "fileName";
             public readonly string documentId = "documentId";
             public readonly string page = "page";
         }
@@ -138,11 +121,9 @@ namespace AzureTraining.Web.Controllers
             {
                 public readonly string Upload = "Upload";
                 public readonly string View = "View";
-                public readonly string ViewDocumentPage = "ViewDocumentPage";
             }
             public readonly string Upload = "~/Views/Documents/Upload.cshtml";
             public readonly string View = "~/Views/Documents/View.cshtml";
-            public readonly string ViewDocumentPage = "~/Views/Documents/ViewDocumentPage.cshtml";
         }
     }
 
@@ -170,25 +151,14 @@ namespace AzureTraining.Web.Controllers
             return callInfo;
         }
 
-        partial void ViewOverride(T4MVC_System_Web_Mvc_ActionResult callInfo, string documentId);
+        partial void ViewOverride(T4MVC_System_Web_Mvc_ActionResult callInfo, string documentId, int page);
 
-        public override System.Web.Mvc.ActionResult View(string documentId)
+        public override System.Web.Mvc.ActionResult View(string documentId, int page)
         {
             var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.View);
             ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "documentId", documentId);
-            ViewOverride(callInfo, documentId);
-            return callInfo;
-        }
-
-        partial void ViewDocumentPageOverride(T4MVC_System_Web_Mvc_ActionResult callInfo, string fileName, string documentId, int page);
-
-        public override System.Web.Mvc.ActionResult ViewDocumentPage(string fileName, string documentId, int page)
-        {
-            var callInfo = new T4MVC_System_Web_Mvc_ActionResult(Area, Name, ActionNames.ViewDocumentPage);
-            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "fileName", fileName);
-            ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "documentId", documentId);
             ModelUnbinderHelpers.AddRouteValues(callInfo.RouteValueDictionary, "page", page);
-            ViewDocumentPageOverride(callInfo, fileName, documentId, page);
+            ViewOverride(callInfo, documentId, page);
             return callInfo;
         }
 

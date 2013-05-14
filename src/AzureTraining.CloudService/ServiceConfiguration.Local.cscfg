@@ -20,6 +20,7 @@
       <Setting name="DataConnectionString" value="UseDevelopmentStorage=true" />
       <Setting name="WorkerSleepTime" value="2000" />
       <Setting name="QLog" value="QLog" />
+      <Setting name="DocumentsTable" value="Documents" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>
