@@ -10,5 +10,11 @@
 
         public const string ContentType = "text/plain";
         
+        public static class UiDefines
+        {
+            public const string UploadFileInputId = "file";
+            public const string UploadFilePreviewId = "Content";
+            
+        }
     }
 }

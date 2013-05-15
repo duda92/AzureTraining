@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Web.Mvc;
-using AzureTraining.Core;
 using AzureTraining.Core.Interfaces;
 using PagedList;
 

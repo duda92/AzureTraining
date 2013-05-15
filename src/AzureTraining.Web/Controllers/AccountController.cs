@@ -4,7 +4,6 @@ using System.Linq;
 using System.Transactions;
 using System.Web.Mvc;
 using System.Web.Security;
-using AzureTraining.Core;
 using AzureTraining.Core.Interfaces;
 using DotNetOpenAuth.AspNet;
 using Microsoft.Web.WebPages.OAuth;
@@ -18,7 +17,7 @@ namespace AzureTraining.Web.Controllers
     [InitializeSimpleMembership]
     public partial class AccountController : Controller
     {
-        ILogger _logger;
+        readonly ILogger _logger;
 
         public AccountController(ILogger logger)
         {

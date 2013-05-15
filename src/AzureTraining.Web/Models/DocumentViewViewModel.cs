@@ -6,6 +6,8 @@ namespace AzureTraining.Web.Models
     {
         public Document Document { get; set; }
 
-        public DocumentPageViewViewModel DocumentPageViewViewModel { get; set; }
+        public string PageContent { get; set; }
+
+        public int PageNumber { get; set; }
     }
 }

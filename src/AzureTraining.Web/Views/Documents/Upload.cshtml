@@ -1,9 +1,10 @@
-﻿@using AzureTraining.Web.Helpers;
+﻿@using AzureTraining.Core.WindowsAzure
+@using AzureTraining.Web.Helpers;
 @model AzureTraining.Web.Models.DocumentUploadViewModel
 
 @{
-    var fileInputId = "file";
-    var textInputId = "Content";
+    const string fileInputId = Defines.UiDefines.UploadFileInputId;
+    const string textInputId = Defines.UiDefines.UploadFilePreviewId;
 }
 
 <div class="progress progress-striped active" id="loading" style="padding:40px">
@@ -22,7 +23,7 @@
         
     </div>
     
-    @Html.EditorFor(x => x.Content, MVC.Shared.Views.EditorTemplates.FileEditablePreview, new { fileInputId = fileInputId, textInputId = textInputId })
+    @Html.EditorFor(x => x.Content, MVC.Shared.Views.EditorTemplates.FileEditablePreview)
     
     <div class="control-group" data-bind="visible: fileSelected">
         <div class="controls">

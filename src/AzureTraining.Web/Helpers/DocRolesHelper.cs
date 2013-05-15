@@ -1,7 +1,5 @@
 ﻿using System.Web;
 using AzureTraining.Core;
-using System;
-using System.Linq;
 
 namespace AzureTraining.Web.Helpers
 {
@@ -24,6 +22,11 @@ namespace AzureTraining.Web.Helpers
         public static void SetCurrentUserAsOwnerOfDocument(Document doc)
         {
             doc.Owner = CurrentOwnerKey;
+        }
+
+        public static string GetCurrentUserAsOwner()
+        {
+            return CurrentOwnerKey;
         }
     }
 }

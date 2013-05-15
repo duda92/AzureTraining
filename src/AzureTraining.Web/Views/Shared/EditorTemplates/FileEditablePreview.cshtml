@@ -1,12 +1,13 @@
-﻿@model string
+﻿@using AzureTraining.Core.WindowsAzure
+@model string
 
 @{
-    var fileInputId = ViewData["fileInputId"] != null ? (string)ViewData["fileInputId"] : "file";
-    var fileInputName = fileInputId;
+    const string fileInputId = Defines.UiDefines.UploadFileInputId;
+    const string fileInputName = fileInputId;
 
-    var textInputId = ViewData["textInputId"] != null ? (string)ViewData["textInputId"] : "Content";
-    var textInputName = textInputId;
-    
+    const string textInputId = Defines.UiDefines.UploadFilePreviewId;
+    const string textInputName = textInputId;
+
 }
 
 <div class="control-group">

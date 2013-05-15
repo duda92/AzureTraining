@@ -1,7 +1,5 @@
 ﻿using AzureTraining.Core;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AzureTraining.Web.Models
 {
@@ -11,7 +9,7 @@ namespace AzureTraining.Web.Models
 
         public DocumentsListViewModel(IEnumerable<Document> documents)
         {
-            this.Documents = documents;
+            Documents = documents;
         }
     }
 }

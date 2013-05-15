@@ -36,13 +36,10 @@ namespace AzureTraining.Web.Controllers
             var document = new Document
             {
                 Name = model.Name,
-                IsShared = model.IsShared
+                IsShared = model.IsShared,
+                Owner = DocRolesHelper.GetCurrentUserAsOwner()
             };
-
-            DocRolesHelper.SetCurrentUserAsOwnerOfDocument(document);
-
             _repository.Add(document, model.Content);
-
             _logger.DocumentUploaded(document.Name, document.Owner);
             return RedirectToAction(MVC.Home.Index());
         }
@@ -56,13 +53,8 @@ namespace AzureTraining.Web.Controllers
             var viewModel = new DocumentViewViewModel
             {
                 Document = document,
-                DocumentPageViewViewModel = new DocumentPageViewViewModel
-                {
-                    Text = content,
-                    DocumentName = "fileName",
-                    DocumentId = documentId, 
-                    Page = page
-                }
+                PageContent = content,
+                PageNumber = page
             };
 
             return View(viewModel);

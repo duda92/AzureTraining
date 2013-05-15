@@ -1,4 +1,3 @@
-using AzureTraining.Core;
 using AzureTraining.Core.Interfaces;
 using AzureTraining.Core.WindowsAzure;
 using AzureTraining.Core.WindowsAzure.AzureLogging;
