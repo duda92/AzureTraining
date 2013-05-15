@@ -16,7 +16,7 @@
                             Actions <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a href="@doc.Url">Downdolad</a></li>
+                            <li><a href="@doc.OriginFileUrl">Downdolad</a></li>
                             <li>@Html.ActionLink("View", MVC.Documents.View(@doc.DocumentId))</li>
                             <li>
                                 @if (DocRolesHelper.IsCurrentUserOwnerOfDocument(doc))

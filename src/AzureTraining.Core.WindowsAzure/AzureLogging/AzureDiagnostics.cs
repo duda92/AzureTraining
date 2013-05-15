@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using AzureTraceListeners.Listeners;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
@@ -10,11 +9,11 @@ namespace AzureTraining.Core.WindowsAzure.AzureLogging
 {
     public static class AzureDiagnostics
     {
-        private static readonly string DignosticsLogsTable;
+        private static readonly string DiagnosticsLogsTable;
 
         static AzureDiagnostics()
         {
-            DignosticsLogsTable = CloudConfigurationHelper.DignosticsLogsTable;
+            DiagnosticsLogsTable = CloudConfigurationHelper.DignosticsLogsTable;
         }
 
         /// <summary>
@@ -27,7 +26,7 @@ namespace AzureTraining.Core.WindowsAzure.AzureLogging
             dmc.Logs.ScheduledTransferLogLevelFilter = LogLevel.Error;
 
             string connectionString = RoleEnvironment.GetConfigurationSettingValue(SettingsKeys.DiagnosticsConnectionString);
-            Trace.Listeners.Add(new AzureTableTraceListener(RoleEnvironment.CurrentRoleInstance.Id, connectionString, DignosticsLogsTable));
+            Trace.Listeners.Add(new AzureTableTraceListener(RoleEnvironment.CurrentRoleInstance.Id, connectionString, DiagnosticsLogsTable));
             
             //Windows Event Logs
             dmc.WindowsEventLog.DataSources.Add("System!*");

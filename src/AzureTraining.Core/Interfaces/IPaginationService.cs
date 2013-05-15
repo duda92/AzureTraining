@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace AzureTraining.Core
+﻿namespace AzureTraining.Core.Interfaces
 {
     public interface IPaginationService
     {

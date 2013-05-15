@@ -33,6 +33,7 @@
       <Setting name="WorkerSleepTime" />
       <Setting name="QLog" />
       <Setting name="DocumentsTable" />
+      <Setting name="DiagnosticsLogsTable" />
     </ConfigurationSettings>
   </WorkerRole>
 </ServiceDefinition>

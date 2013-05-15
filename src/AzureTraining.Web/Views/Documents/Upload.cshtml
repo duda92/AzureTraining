@@ -52,59 +52,58 @@
         viewModel =
             {
                 maxSize: 111048576,
+                maxPreviewSize: 204800,
                 fileTypes: ['text/plain'],
                 fileExtensions: ['txt'],
                 fileValidationMessage: ko.observable(null),
                 contentInput: $("#@textInputId"),
-                
+
                 fileSelected: ko.observable(false),
                 fileSize: ko.observable(0),
                 fileType: ko.observable(),
                 fileName: ko.observable(),
 
-                SelectFile: function(file)
-                {
-                    if (typeof (file) == "undefined")
-                    {
+                doPreview: ko.observable(true),
+
+                SelectFile: function (file) {
+                    if (typeof (file) == "undefined") {
                         viewModel.fileSelected(false);
                     }
-                    else
-                    {
+                    else {
                         viewModel.fileSize(file.size);
                         viewModel.fileType(file.type);
                         viewModel.fileName(file.name);
 
-                        if (!viewModel.ValidateFile())
-                        {
+                        if (!viewModel.ValidateFile()) {
                             viewModel.fileSelected(false);
                             return;
                         }
-
-                        var reader = new FileReader();
-                        reader.onload = function (e)
+                        if (viewModel.doPreview()) 
                         {
-                            viewModel.contentInput.html(e.target.result);
+                            var reader = new FileReader();
+                            reader.onload = function (e) {
+                                viewModel.contentInput.html(e.target.result);
+                                viewModel.fileSelected(true);
+                            };
+                            reader.readAsText(file);
+                        } else {
                             viewModel.fileSelected(true);
-                        };
-                        reader.readAsText(file)
+                        }
                     }
                 },
 
-                ValidateFile: function (file)
-                {
-                    if (viewModel.fileSize() > viewModel.maxSize)
-                    {
+                ValidateFile: function (file) {
+                    if (viewModel.fileSize() > viewModel.maxSize) {
                         viewModel.fileValidationMessage("FileSize is larger than" + viewModel.maxSize + "bytes");
                         return false;
                     }
-                    if ($.inArray(viewModel.fileType(), viewModel.fileTypes) == -1)
-                    {
+                    viewModel.doPreview(viewModel.fileSize() < viewModel.maxPreviewSize);
+                    if ($.inArray(viewModel.fileType(), viewModel.fileTypes) == -1) {
                         viewModel.fileValidationMessage("FileType is not allowed. Use only text files with unicode encoding");
                         return false;
                     }
                     var extension = viewModel.fileName().split('.').pop();
-                    if ($.inArray(extension, viewModel.fileExtensions) == -1)
-                    {
+                    if ($.inArray(extension, viewModel.fileExtensions) == -1) {
                         viewModel.fileValidationMessage("FileExtension is not acceptable");
                         return false;
                     }
@@ -114,12 +113,11 @@
                 }
             };
         ko.applyBindings(viewModel);
-        
+
         $("#loading").hide();
         $("#page").css('visibility', 'visible');
 
-        $("#@fileInputId").change(function (e)
-        {
+        $("#@fileInputId").change(function (e) {
             var file = e.target.files[0];
             viewModel.SelectFile(file);
         });

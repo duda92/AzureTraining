@@ -1,9 +1,8 @@
 ﻿namespace AzureTraining.Core.WindowsAzure
 {
-    using System;
     using System.Globalization;
     using Microsoft.WindowsAzure.StorageClient;
-    using AzureTraining.Core;
+    using Core;
 
     public class DocumentRow : TableServiceEntity
     {
@@ -11,7 +10,9 @@
 
         public string Name { get; set; }
 
-        public string Url { get; set; }
+        public string OriginalFileUrl { get; set; }
+
+        public string ProcessedFileUrl { get; set; }
 
         public string Owner { get; set; }
 
@@ -21,26 +22,22 @@
 
         public int PagesCount { get; set; }
 
-        public DocumentRow() : base()
+        public DocumentRow() 
         {
         }
 
         public DocumentRow(Document document)
-            : base(string.Format(CultureInfo.InvariantCulture, "{0}", document.Owner), document.DocumentId.ToString())
+            : base(string.Format(CultureInfo.InvariantCulture, "{0}", document.Owner), document.DocumentId.ToString(CultureInfo.InvariantCulture))
         {
-            this.DocumentId = document.DocumentId;
-            this.Name = document.Name;
-            this.Owner = document.Owner;
-            this.Url = document.Url;
-            this.IsShared = document.IsShared;
-            this.PartitionKey = document.DocumentId;
-            this.Preview = document.Preview;
-            this.PagesCount = document.PagesCount;
-        }
-
-        private DocumentRow(string partitionKey, string rowKey)
-            : base(partitionKey, rowKey)
-        {
+            DocumentId = document.DocumentId;
+            Name = document.Name;
+            Owner = document.Owner;
+            OriginalFileUrl = document.OriginFileUrl;
+            IsShared = document.IsShared;
+            PartitionKey = document.DocumentId;
+            Preview = document.Preview;
+            PagesCount = document.PagesCount;
+            ProcessedFileUrl = document.ProcessedFileUrl;
         }
     }
 }

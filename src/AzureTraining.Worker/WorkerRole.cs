@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using AzureTraining.Core.Interfaces;
 using AzureTraining.Core.Services;
 using AzureTraining.Core.WindowsAzure;
 using AzureTraining.Core.WindowsAzure.Helpers;
@@ -18,14 +19,14 @@ namespace AzureTraining.Worker
 {
     public class WorkerRole : RoleEntryPoint
     {
-        private readonly CloudStorageAccount storageAccount;
+        private readonly CloudStorageAccount _storageAccount;
         private readonly ILogger _logger = new AzureLogger();
         private readonly IPaginationService _paginator = new PaginationService();
         private readonly ITransliterationService _transliterator = new TransliterationService();
+        private const string ContentType = "text/plain";
         
         private QueueClient _client;
-        private bool _isStopped;
-            
+
         public WorkerRole()
         {
             CloudStorageAccount.SetConfigurationSettingPublisher((configName, configSetter) =>
@@ -45,15 +46,14 @@ namespace AzureTraining.Worker
                 };
             });
 
-            this.storageAccount = CloudConfigurationHelper.Account;
+            _storageAccount = CloudConfigurationHelper.Account;
             //AzureDiagnostics.Configure();
         }
 
         
         public override void Run()
         {
-            var queueClient = this.storageAccount.CreateCloudQueueClient();
-
+            var queueClient = _storageAccount.CreateCloudQueueClient();
             int sleepTime = GetSleepTimeFromConfig();
 
             while (true)
@@ -67,12 +67,11 @@ namespace AzureTraining.Worker
 
                     if (msg != null)
                     {
-                        var id = msg.Id;
                         switch (q.Name)
                         {
                             case Defines.DocumentsQueue:
                                 Trace.TraceInformation("Starting process document");
-                                success = this.ProcessDocument(msg);
+                                success = ProcessDocument(msg);
                                 break;
                             default:
                                 Trace.TraceError("Unknown Queue found: {0}", q.Name);
@@ -80,7 +79,14 @@ namespace AzureTraining.Worker
                         }
                         if (success || msg.DequeueCount > 4)
                         {
-                            q.DeleteMessage(msg);
+                            try
+                            {
+                                q.DeleteMessage(msg);
+                            }
+                            catch
+                            {
+                                Trace.TraceError("Error while deleting msg from the bus queue", q.Name);
+                            }
                         }
                     }
                 }
@@ -107,49 +113,71 @@ namespace AzureTraining.Worker
             {
                 try
                 {
-                    CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-                    CloudBlobContainer container = blobClient.GetContainerReference(document.Owner);
-                    var blob = container.GetBlobReference(fileName);
+                    var container = GetOwnerContainer(document);
+                    var originalFileBlob = GetOriginalFileBlob(container, fileName);
+                    var processedFileBlob = CreateProcessedFileBlob(container, fileName);
 
-                    TransleteDocument(blob);
-                    
-                    SetDocumentPreview(document, blob);
-                    
-                    PaginateDocument(document, blob);
-                    
-                    SetUri(blob, document);
-                    
+                    TransleteDocument(processedFileBlob);
+                    SetDocumentPreview(document, processedFileBlob);
+                    PaginateDocument(document, processedFileBlob);  
+                    SetUri(originalFileBlob, processedFileBlob, document);
                     repository.Update(document);
 
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError("SetDocumentPreview failed for {0} and {1}", owner, fileName);
                     Trace.TraceError(ex.ToString());
-
                     return false; 
                 }
                 _logger.DocumentProcessingFinished(document.Owner, document.Name);
                 return true;
             }
-
             Trace.TraceError("Processing document error, cannot find {0}", documentId);
             return false;
         }
-  
+
+        private CloudBlobContainer GetOwnerContainer(Document document)
+        {
+            var blobClient = _storageAccount.CreateCloudBlobClient();
+            var container = blobClient.GetContainerReference(document.Owner);
+            return container;
+        }
+
+        private CloudBlob GetOriginalFileBlob(CloudBlobContainer container, string fileName)
+        {
+            var originalFileBlob = container.GetBlobReference(fileName);
+            return originalFileBlob;
+        }
+
+        private static CloudBlob CreateProcessedFileBlob(CloudBlobContainer container, string originalFileName)
+        {
+            var originFileBlob = container.GetBlobReference(originalFileName);
+            var content = originFileBlob.DownloadText();
+            
+            var fileName = originalFileName + "_processed";
+            var processedFileBlob = container.GetBlobReference(fileName);
+            processedFileBlob.Properties.ContentType = ContentType;
+
+            processedFileBlob.UploadText(content);
+            return processedFileBlob;
+        }
+
         #region DocumentProcessing
 
-        private void SetUri(CloudBlob blob, Document document)
+        private static void SetUri(CloudBlob originalFileBlob, CloudBlob processedFileBlob, Document document)
         {
-            var blobUri = blob.Uri.ToString();
-            document.Url = blobUri;
+            var originalFileUrl  = originalFileBlob.Uri.ToString();
+            var processedFileUrl = processedFileBlob.Uri.ToString();
+
+            document.OriginFileUrl = originalFileUrl;
+            document.ProcessedFileUrl = processedFileUrl;
         }
 
         private void PaginateDocument(Document doc, CloudBlob blob)
         {
             var content = blob.DownloadText();
-            string processed = _paginator.Paginate(content);
-            int pagesCount = _paginator.GetPagesCount(processed);
+            var processed = _paginator.Paginate(content);
+            var pagesCount = _paginator.GetPagesCount(processed);
             doc.PagesCount = pagesCount;
             blob.UploadText(processed);
         }
@@ -157,11 +185,11 @@ namespace AzureTraining.Worker
         private void TransleteDocument(CloudBlob blob)
         {
             var content = blob.DownloadText();
-            string processed = _transliterator.Front(content);
+            var processed = _transliterator.Front(content);
             blob.UploadText(processed);
         }
 
-        private void SetDocumentPreview(Document doc, CloudBlob blob)
+        private static void SetDocumentPreview(Document doc, CloudBlob blob)
         {
             var content = blob.DownloadText();
             var preview = content.Substring(0, Math.Min(Defines.DocumentPreviewLenght, content.Length));
@@ -182,13 +210,11 @@ namespace AzureTraining.Worker
             }
 
             _client = QueueClient.CreateFromConnectionString(connectionString, Defines.DocumentsQueue);
-            _isStopped = false;
             return base.OnStart();
         }
 
         public override void OnStop()
         {
-            _isStopped = true;
             _client.Close();
             base.OnStop();
         }

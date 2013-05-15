@@ -21,6 +21,7 @@
       <Setting name="WorkerSleepTime" value="2000" />
       <Setting name="QLog" value="QLog" />
       <Setting name="DocumentsTable" value="Documents" />
+      <Setting name="DiagnosticsLogsTable" value="Diagnostics" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

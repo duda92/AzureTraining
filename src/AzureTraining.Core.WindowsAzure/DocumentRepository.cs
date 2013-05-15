@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using AzureTraining.Core.Services;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 using System.Collections.Generic;
@@ -13,11 +14,11 @@ namespace AzureTraining.Core.WindowsAzure
         private const string ContentType = "text/plain";
         private const string FileRepeatSuffixTemplate = "_{0}";
 
-        private readonly CloudStorageAccount storageAccount;
+        private readonly CloudStorageAccount _storageAccount;
 
         public DocumentRepository()
         {
-            storageAccount = CloudConfigurationHelper.Account;
+            _storageAccount = CloudConfigurationHelper.Account;
         }
 
         public IEnumerable<Document> GetAccessDocumentsForUser(string user)
@@ -48,8 +49,7 @@ namespace AzureTraining.Core.WindowsAzure
         {
             SaveEntryToTable(document);
             var fileName = SaveBlob(document, text);
-            SendToQueue(Defines.DocumentsQueue, string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.Owner, document.DocumentId, fileName));
-            
+            SendToQueue(Defines.DocumentsQueue, string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.Owner, document.DocumentId, fileName)); 
         }
   
         public void Delete(string documentId)
@@ -76,7 +76,7 @@ namespace AzureTraining.Core.WindowsAzure
 
             SendToQueue(
                 Defines.DocumentsCleanupQueue,
-                string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.DocumentId, document.Owner, document.Url));
+                string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.DocumentId, document.Owner, document.OriginFileUrl));
         }
 
         public void Update(Document document)
@@ -94,9 +94,9 @@ namespace AzureTraining.Core.WindowsAzure
         {
             using (var context = new DocumentsDataContext())
             {
-                var docs = context.Documents.Where(p => p.Owner == owner).ToModel();
+                var docs = context.Documents.Where(p => p.Owner == owner && p.DocumentId == documentId).ToModel();
                 var doc = docs.FirstOrDefault();
-                var documentContent = GetDocumentText(doc);
+                var documentContent = GetProcessedDocumentText(doc);
                 var paginationService = new PaginationService();
                 var content = paginationService.GetDocumentPage(documentContent, page);
                 return content;
@@ -105,7 +105,7 @@ namespace AzureTraining.Core.WindowsAzure
 
         private void SendToQueue(string queueName, string msg)
         {
-            var queues = this.storageAccount.CreateCloudQueueClient();
+            var queues = this._storageAccount.CreateCloudQueueClient();
             var q = queues.GetQueueReference(queueName);
             q.CreateIfNotExist();
             q.AddMessage(new CloudQueueMessage(msg));
@@ -137,11 +137,11 @@ namespace AzureTraining.Core.WindowsAzure
             }
         }
 
-        private void SetUniqueNameAndId(Document document,  int copyNumber)
+        private static void SetUniqueNameAndId(Document document,  int copyNumber)
         {
-            string extension = System.IO.Path.GetExtension(document.Name);
+            var extension = System.IO.Path.GetExtension(document.Name);
             RemovePreviousSuffix(copyNumber, document, extension);
-            string fileName = System.IO.Path.GetFileNameWithoutExtension(document.Name);
+            var fileName = System.IO.Path.GetFileNameWithoutExtension(document.Name);
             
             var copySuffix = copyNumber == 0 ? string.Empty : string.Format(FileRepeatSuffixTemplate, copyNumber);
             var identityString = document.Owner + fileName + copySuffix + extension;
@@ -150,7 +150,7 @@ namespace AzureTraining.Core.WindowsAzure
             document.Name = fileName + copySuffix + extension;
         }
   
-        private void RemovePreviousSuffix(int copyNumber, Document document, string extension)
+        private static void RemovePreviousSuffix(int copyNumber, Document document, string extension)
         {
             if (copyNumber > 1)
             {
@@ -160,7 +160,7 @@ namespace AzureTraining.Core.WindowsAzure
  
         private string SaveBlob(Document document, string text)
         {
-            var storage = storageAccount.CreateCloudBlobClient();
+            var storage = _storageAccount.CreateCloudBlobClient();
             var container = storage.GetContainerReference(document.Owner.ToLowerInvariant());
             container.CreateIfNotExist();
             container.SetPermissions(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
@@ -171,11 +171,11 @@ namespace AzureTraining.Core.WindowsAzure
             return fileName;
         }
 
-        private string GetDocumentText(Document document)
+        private string GetProcessedDocumentText(Document document)
         {
-            var blobClient = storageAccount.CreateCloudBlobClient();
+            var blobClient = _storageAccount.CreateCloudBlobClient();
             var container = blobClient.GetContainerReference(document.Owner);
-            var blob = container.GetBlobReference(document.Name);
+            var blob = container.GetBlobReference(document.Name + "_processed");
             var text = blob.DownloadText();
             return text;
         }

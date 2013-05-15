@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using AzureTraining.Core.WindowsAzure.AzureLogging;
 using Microsoft.WindowsAzure.ServiceRuntime;
 
@@ -9,7 +7,7 @@ namespace AzureTraining.Web
     {
         public override bool OnStart()
         {
-            AzureDiagnostics.Configure();
+            //AzureDiagnostics.Configure();
             return base.OnStart();
         }
     }
