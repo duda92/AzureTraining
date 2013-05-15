@@ -26,7 +26,7 @@ namespace AzureTraining.Core.WindowsAzure.AzureLogging
         {
             get
             {
-                return this.CreateQuery<QLogEntry>(LogsTable);
+                return CreateQuery<QLogEntry>(LogsTable);
             }
         }
 

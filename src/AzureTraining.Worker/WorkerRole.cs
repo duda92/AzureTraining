@@ -11,9 +11,9 @@ using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
-using Microsoft.WindowsAzure.StorageClient;
 using AzureTraining.Core;
 using AzureTraining.Core.WindowsAzure.AzureLogging;
+using Microsoft.WindowsAzure.StorageClient;
 
 namespace AzureTraining.Worker
 {
@@ -23,7 +23,6 @@ namespace AzureTraining.Worker
         private readonly ILogger _logger = new AzureLogger();
         private readonly IPaginationService _paginator = new PaginationService();
         private readonly ITransliterationService _transliterator = new TransliterationService();
-        private const string ContentType = "text/plain";
         
         private QueueClient _client;
 
@@ -54,7 +53,7 @@ namespace AzureTraining.Worker
         public override void Run()
         {
             var queueClient = _storageAccount.CreateCloudQueueClient();
-            int sleepTime = GetSleepTimeFromConfig();
+            var sleepTime = GetSleepTimeFromConfig();
 
             while (true)
             {
@@ -95,16 +94,9 @@ namespace AzureTraining.Worker
   
         private bool ProcessDocument(CloudQueueMessage msg)
         {
-            var parts = msg.AsString.Split('|');
-
-            if (parts.Length != 3)
-            {
-                Trace.TraceError("Unexpected input to the photo cleanup queue: {0}", msg.AsString);
-                return false;
-            }
-            var owner = parts[0];
-            var documentId = parts[1];
-            var fileName = parts[2];
+            var documentId = QueueMessageService.GetDocumentIdParam(msg);
+            var fileName = QueueMessageService.GetFileNameParam(msg);
+            var owner = QueueMessageService.GetOwnerParam(msg);
 
             var repository = new DocumentRepository();
             var document = repository.GetDocumentById(owner, documentId);
@@ -154,9 +146,9 @@ namespace AzureTraining.Worker
             var originFileBlob = container.GetBlobReference(originalFileName);
             var content = originFileBlob.DownloadText();
             
-            var fileName = originalFileName + "_processed";
+            var fileName = NamingHelper.GetProcessedFileName(originalFileName);
             var processedFileBlob = container.GetBlobReference(fileName);
-            processedFileBlob.Properties.ContentType = ContentType;
+            processedFileBlob.Properties.ContentType = Defines.ContentType;
 
             processedFileBlob.UploadText(content);
             return processedFileBlob;
@@ -168,7 +160,6 @@ namespace AzureTraining.Worker
         {
             var originalFileUrl  = originalFileBlob.Uri.ToString();
             var processedFileUrl = processedFileBlob.Uri.ToString();
-
             document.OriginFileUrl = originalFileUrl;
             document.ProcessedFileUrl = processedFileUrl;
         }
@@ -201,14 +192,12 @@ namespace AzureTraining.Worker
         public override bool OnStart()
         {
             ServicePointManager.DefaultConnectionLimit = 12;
-
-            string connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            var connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
             var namespaceManager = NamespaceManager.CreateFromConnectionString(connectionString);
             if (!namespaceManager.QueueExists(Defines.DocumentsQueue))
             {
                 namespaceManager.CreateQueue(Defines.DocumentsQueue);
             }
-
             _client = QueueClient.CreateFromConnectionString(connectionString, Defines.DocumentsQueue);
             return base.OnStart();
         }
@@ -223,17 +212,14 @@ namespace AzureTraining.Worker
         private static int GetSleepTimeFromConfig()
         {
             int sleepTime;
-
             if (!int.TryParse(RoleEnvironment.GetConfigurationSettingValue("WorkerSleepTime"), out sleepTime))
             {
                 sleepTime = 0;
             }
-
             if (sleepTime < 1000)
             {
                 sleepTime = 2000;
             }
-
             return sleepTime;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using AzureTraining.Core;
+using AzureTraining.Core.Interfaces;
 using AzureTraining.Web.Helpers;
 using AzureTraining.Web.Models;
 using System.Web.Mvc;

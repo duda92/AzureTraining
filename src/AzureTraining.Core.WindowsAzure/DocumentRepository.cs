@@ -1,31 +1,31 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
+using AzureTraining.Core.Interfaces;
 using AzureTraining.Core.Services;
 using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.StorageClient;
 using System.Collections.Generic;
 using AzureTraining.Core.WindowsAzure.Helpers;
+using Microsoft.WindowsAzure.StorageClient;
 
 namespace AzureTraining.Core.WindowsAzure
 {
     public class DocumentRepository : IDocumentRepository
     {
         private const string ContentType = "text/plain";
-        private const string FileRepeatSuffixTemplate = "_{0}";
-
         private readonly CloudStorageAccount _storageAccount;
-
+        private readonly QueueMessageService _queueMessageService;
+        
         public DocumentRepository()
         {
             _storageAccount = CloudConfigurationHelper.Account;
+            _queueMessageService = new QueueMessageService(_storageAccount);
         }
 
         public IEnumerable<Document> GetAccessDocumentsForUser(string user)
         {
             using (var context = new DocumentsDataContext())
             {
-                return context.Documents.Where(p => p.IsShared == true || p.Owner == user).AsTableServiceQuery().ToList().ToModel();
+                return context.Documents.Where(p => p.IsShared || p.Owner == user).AsTableServiceQuery().ToList().ToModel();
             }
         }
 
@@ -33,7 +33,7 @@ namespace AzureTraining.Core.WindowsAzure
         {
             using (var context = new DocumentsDataContext())
             {
-                return context.Documents.Where(p => p.Owner == owner && true).AsTableServiceQuery().AsEnumerable().ToModel();
+                return context.Documents.Where(p => p.Owner == owner).AsTableServiceQuery().AsEnumerable().ToModel();
             }
         }
 
@@ -49,7 +49,7 @@ namespace AzureTraining.Core.WindowsAzure
         {
             SaveEntryToTable(document);
             var fileName = SaveBlob(document, text);
-            SendToQueue(Defines.DocumentsQueue, string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.Owner, document.DocumentId, fileName)); 
+            _queueMessageService.SendToDocumentsQueue(document.DocumentId, document.Owner, fileName); 
         }
   
         public void Delete(string documentId)
@@ -57,7 +57,6 @@ namespace AzureTraining.Core.WindowsAzure
             using (var context = new DocumentsDataContext())
             {
                 var document = context.Documents.Where(p => p.DocumentId == documentId && true).AsTableServiceQuery().ToModel().SingleOrDefault();
-
                 if (document != null)
                 {
                     Delete(document);
@@ -74,9 +73,7 @@ namespace AzureTraining.Core.WindowsAzure
             context.DeleteObject(documentRow);
             context.SaveChanges();
 
-            SendToQueue(
-                Defines.DocumentsCleanupQueue,
-                string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}", document.DocumentId, document.Owner, document.OriginFileUrl));
+            _queueMessageService.SendToDocumentsCleanupQueue(document.DocumentId, document.Owner, document.OriginFileUrl);
         }
 
         public void Update(Document document)
@@ -96,6 +93,8 @@ namespace AzureTraining.Core.WindowsAzure
             {
                 var docs = context.Documents.Where(p => p.Owner == owner && p.DocumentId == documentId).ToModel();
                 var doc = docs.FirstOrDefault();
+                if (doc == null)
+                    throw new ArgumentNullException("document", "document not found");
                 var documentContent = GetProcessedDocumentText(doc);
                 var paginationService = new PaginationService();
                 var content = paginationService.GetDocumentPage(documentContent, page);
@@ -103,23 +102,15 @@ namespace AzureTraining.Core.WindowsAzure
             }
         }
 
-        private void SendToQueue(string queueName, string msg)
+        private static void SaveEntryToTable(Document document)
         {
-            var queues = this._storageAccount.CreateCloudQueueClient();
-            var q = queues.GetQueueReference(queueName);
-            q.CreateIfNotExist();
-            q.AddMessage(new CloudQueueMessage(msg));
-        }
-
-        private void SaveEntryToTable(Document document)
-        {
-            for (int copyNumber = 0; copyNumber < int.MaxValue; copyNumber++)
+            for (var copyNumber = 0; copyNumber < int.MaxValue; copyNumber++)
             {
                 try
                 {
                     using (var context = new DocumentsDataContext())
                     {
-                        SetUniqueNameAndId(document, copyNumber);
+                        NamingHelper.AttachCopyNumberToFileName(document, copyNumber);
                         var docRow = new DocumentRow(document);
                         context.AddObject(context.DocumentsTable, docRow);
                         context.SaveChanges();
@@ -137,34 +128,13 @@ namespace AzureTraining.Core.WindowsAzure
             }
         }
 
-        private static void SetUniqueNameAndId(Document document,  int copyNumber)
-        {
-            var extension = System.IO.Path.GetExtension(document.Name);
-            RemovePreviousSuffix(copyNumber, document, extension);
-            var fileName = System.IO.Path.GetFileNameWithoutExtension(document.Name);
-            
-            var copySuffix = copyNumber == 0 ? string.Empty : string.Format(FileRepeatSuffixTemplate, copyNumber);
-            var identityString = document.Owner + fileName + copySuffix + extension;
-
-            document.DocumentId = KeyGenerationHelper.GetSlug(identityString);
-            document.Name = fileName + copySuffix + extension;
-        }
-  
-        private static void RemovePreviousSuffix(int copyNumber, Document document, string extension)
-        {
-            if (copyNumber > 1)
-            {
-                document.Name = document.Name.Replace(string.Format(FileRepeatSuffixTemplate + extension, copyNumber - 1), extension);
-            }
-        }
- 
         private string SaveBlob(Document document, string text)
         {
             var storage = _storageAccount.CreateCloudBlobClient();
             var container = storage.GetContainerReference(document.Owner.ToLowerInvariant());
             container.CreateIfNotExist();
             container.SetPermissions(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
-            var fileName = document.Name.Substring(document.Name.LastIndexOf("\\", StringComparison.OrdinalIgnoreCase) + 1);
+            var fileName = NamingHelper.RemoveFullPath(document.Name);
             var blob = container.GetBlobReference(fileName);
             blob.Properties.ContentType = ContentType;
             blob.UploadText(text);
@@ -175,7 +145,7 @@ namespace AzureTraining.Core.WindowsAzure
         {
             var blobClient = _storageAccount.CreateCloudBlobClient();
             var container = blobClient.GetContainerReference(document.Owner);
-            var blob = container.GetBlobReference(document.Name + "_processed");
+            var blob = container.GetBlobReference(NamingHelper.GetProcessedFileName(document.Name));
             var text = blob.DownloadText();
             return text;
         }

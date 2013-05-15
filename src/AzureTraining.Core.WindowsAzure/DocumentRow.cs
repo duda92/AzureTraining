@@ -1,7 +1,8 @@
-﻿namespace AzureTraining.Core.WindowsAzure
+﻿using Microsoft.WindowsAzure.StorageClient;
+
+namespace AzureTraining.Core.WindowsAzure
 {
     using System.Globalization;
-    using Microsoft.WindowsAzure.StorageClient;
     using Core;
 
     public class DocumentRow : TableServiceEntity

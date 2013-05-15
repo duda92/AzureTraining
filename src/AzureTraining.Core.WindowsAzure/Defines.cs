@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace AzureTraining.Core.WindowsAzure
+﻿namespace AzureTraining.Core.WindowsAzure
 {
     public static class Defines
     {
@@ -10,5 +7,8 @@ namespace AzureTraining.Core.WindowsAzure
         public const string DocumentsCleanupQueue = "cleanupdocuments";
 
         public const int DocumentPreviewLenght = 200;
+
+        public const string ContentType = "text/plain";
+        
     }
 }

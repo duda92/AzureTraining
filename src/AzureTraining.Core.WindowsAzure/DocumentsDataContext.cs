@@ -1,19 +1,20 @@
-﻿namespace AzureTraining.Core.WindowsAzure
+﻿using Microsoft.WindowsAzure.StorageClient;
+
+namespace AzureTraining.Core.WindowsAzure
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.WindowsAzure;
-    using Microsoft.WindowsAzure.StorageClient;
-    using AzureTraining.Core.WindowsAzure.Helpers;
+    using Helpers;
 
     public class DocumentsDataContext : TableServiceContext, IDisposable
     {
         public  readonly string DocumentsTable;
-        private readonly Dictionary<string, Type> resolverTypes;
+        private readonly Dictionary<string, Type> _resolverTypes;
 
-        private static bool initialized;
-        private static readonly object initializationLock = new object();
+        private static bool _initialized;
+        private static readonly object InitializationLock = new object();
 
         
         public DocumentsDataContext()
@@ -26,32 +27,29 @@
             : base(account.TableEndpoint.ToString(), account.Credentials)
         {
             DocumentsTable = CloudConfigurationHelper.DocumentsTable;
-            if (!initialized)
+            if (!_initialized)
             {
-                lock (initializationLock)
+                lock (InitializationLock)
                 {
-                    if (!initialized)
+                    if (!_initialized)
                     {
-                        this.CreateTables();
-                        initialized = true;
+                        CreateTables();
+                        _initialized = true;
                     }
                 }
             }
 
             // we are setting up a dictionary of types to resolve in order
             // to workaround a performance bug during serialization
-            this.resolverTypes = new Dictionary<string, Type>();
-            this.resolverTypes.Add(DocumentsTable, typeof(DocumentRow));
-
-            this.ResolveType = (name) =>
+            _resolverTypes = new Dictionary<string, Type> {{DocumentsTable, typeof (DocumentRow)}};
+            ResolveType = (name) =>
             {
                 var parts = name.Split('.');
                 if (parts.Length == 2)
                 {
                     var processedKey = UppercaseFirst(parts[1]);
-                    return resolverTypes[processedKey];
+                    return _resolverTypes[processedKey];
                 }
-
                 return null;
             };
         }
@@ -69,7 +67,7 @@
         {
             get
             {
-                return this.CreateQuery<DocumentRow>(DocumentsTable);
+                return CreateQuery<DocumentRow>(DocumentsTable);
             }
         }
 
@@ -80,7 +78,7 @@
 
         public void CreateTables()
         {
-            TableStorageExtensionMethods.CreateTablesFromModel(typeof(DocumentsDataContext), this.BaseUri.AbsoluteUri, this.StorageCredentials);
+            TableStorageExtensionMethods.CreateTablesFromModel(typeof(DocumentsDataContext), BaseUri.AbsoluteUri, StorageCredentials);
         }
 
         public void Dispose()

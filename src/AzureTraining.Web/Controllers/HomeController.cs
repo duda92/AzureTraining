@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Web.Mvc;
 using AzureTraining.Core;
+using AzureTraining.Core.Interfaces;
 using AzureTraining.Web.Models;
 using AzureTraining.Core.WindowsAzure;
 

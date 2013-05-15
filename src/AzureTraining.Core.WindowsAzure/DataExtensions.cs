@@ -33,7 +33,7 @@ namespace AzureTraining.Core.WindowsAzure
 
         public static UserLog ToModel(this QLogEntry row)
         {
-            return new UserLog()
+            return new UserLog
             {
                 User = row.User,
                 Date = row.CreatedOn,

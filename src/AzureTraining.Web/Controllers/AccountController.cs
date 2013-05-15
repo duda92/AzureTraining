@@ -5,6 +5,7 @@ using System.Transactions;
 using System.Web.Mvc;
 using System.Web.Security;
 using AzureTraining.Core;
+using AzureTraining.Core.Interfaces;
 using DotNetOpenAuth.AspNet;
 using Microsoft.Web.WebPages.OAuth;
 using WebMatrix.WebData;

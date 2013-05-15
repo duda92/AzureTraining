@@ -1,10 +1,11 @@
-﻿namespace Microsoft.WindowsAzure.StorageClient
-{
-    using System;
-    using System.Linq;
-    using System.Reflection;
-    using Microsoft.WindowsAzure;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.StorageClient;
 
+namespace AzureTraining.Core.WindowsAzure
+{
     /// <summary>
     /// Development Storage currently requires the schema for an entity stored in a table to have been 
     /// previously defined before you are allowed to query it. To provide the schema, the methods in this 
@@ -51,7 +52,7 @@
         {
             CloudTableClient.CreateTablesFromModel(serviceContextType, baseAddress, credentials);
 
-            CloudTableClient tableStorage = new CloudTableClient(baseAddress, credentials);
+            var tableStorage = new CloudTableClient(baseAddress, credentials);
 
             // Execute conditionally for development storage only
             if (tableStorage.BaseUri.IsLoopback)
@@ -61,7 +62,7 @@
                 var properties = serviceContextType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
                 foreach (var table in properties.Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(IQueryable<>)))
                 {
-                    TableServiceEntity entity = Activator.CreateInstance(table.PropertyType.GetGenericArguments()[0]) as TableServiceEntity;
+                    var entity = Activator.CreateInstance(table.PropertyType.GetGenericArguments()[0]) as TableServiceEntity;
                     if (entity != null)
                     {
                         InitializeTableSchemaFromEntity(tableStorage, table.Name, entity);
